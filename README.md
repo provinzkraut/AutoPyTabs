@@ -143,3 +143,10 @@ Or for whole sections / files
 ## Compatibility with `pymdownx.snippets`
 
 If the `pymdownx.snippets` extension is used, make sure that it runs **before** AutoPyTab
+
+## Configuration
+
+|                               |                                   |
+|-------------------------------|-----------------------------------|
+| min_version (default: `3.7`)  | Minimum Python version to support |
+| max_version (default: `3.11`) | Maximum Python version to support |
