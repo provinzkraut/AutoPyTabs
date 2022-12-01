@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "auto-pytabs"
+version = "0.1.0"
+description = "Markdown extension to automatically create pymdown.tabbed tabs for different python versions"
+authors = ["Janek Nouvertné"]
+readme = "README.md"
+packages = [{ include = "auto_pytabs.py" }]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+mkdocs = "^1.4.2"
+pyupgrade = "^3.2.2"
+autoflake = "^1.7.7"
+mkdocs-material = "^8.5.10"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.10.0"
+mypy = "^0.990"
+types-markdown = "^3.4.2.1"
+pytest = "^7.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.mypy]
+strict = true
