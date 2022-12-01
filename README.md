@@ -2,7 +2,32 @@
 
 A markdown extension to automatically generate 
 [pymdown tabs](https://facelessuser.github.io/pymdown-extensions/extensions/tabbed/)
-for different Python versions.
+for different Python versions using [pyupgrade](https://github.com/asottile/pyupgrade).
+
+## Usage
+
+From python
+
+```python
+from markdown import markdown
+from auto_pytabs import UpgradeExtension
+
+markdown("...", extensions=[UpgradeExtension(min_version="3.8"), "pymdownx.tabbed"])
+```
+
+Integrated in mkdocs:
+
+```yaml
+site_name: My Docs
+theme:
+  name: material
+markdown_extensions:
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets
+  - auto_pytabs:
+      min_version: "3.8"
+```
 
 ## Example
 
@@ -17,7 +42,7 @@ def foo(bar: Optional[str]) -> Dict[str, str]:
 ```
 </pre>
 
-**Output**
+**Generated markdown**
 
 <pre>
 === "Python 3.7+"
@@ -69,7 +94,7 @@ Nested tabs are supported as well:
     Goodbye, world!
 </pre>
 
-**Output**
+**Generated markdown**
 
 <pre>
 === "Level 1-1"
@@ -96,9 +121,9 @@ Nested tabs are supported as well:
     
 </pre>
 
-## Per-block disable
-You can disable conversion for a single code block:
+## Selectively disable
 
+You can disable conversion for a single code block:
 
     <!-- autopytabs: disable-block -->
     ```python
@@ -108,14 +133,13 @@ You can disable conversion for a single code block:
         ...
     ```
 
-
-
-## Section disable
 Or for whole sections / files
-
 
     <!-- autopytabs: disable -->
     everything after this will be ignored
     <!-- autopytabs: enable -->
     re-enables conversion again
 
+## Compatibility with `pymdownx.snippets`
+
+If the `pymdownx.snippets` extension is used, make sure that it runs **before** AutoPyTab
