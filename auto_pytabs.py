@@ -18,16 +18,19 @@ PYTAB_DIRECTIVES: Set[PyTabDirective] = {"disable", "enable", "disable-block"}
 
 
 def _upgrade(code: str, min_version: VersionTuple) -> str:
-    return autoflake.fix_code(  # type: ignore[no-any-return]
-        _fix_plugins(
-            code,
-            settings=PyUpgradeSettings(
-                min_version=min_version,
-                keep_percent_format=True,
-                keep_mock=True,
-                keep_runtime_typing=True,
-            ),
+    upgraded_code = _fix_plugins(
+        code,
+        settings=PyUpgradeSettings(
+            min_version=min_version,
+            keep_percent_format=True,
+            keep_mock=True,
+            keep_runtime_typing=True,
         ),
+    )
+    if upgraded_code == code:
+        return code
+    return autoflake.fix_code(  # type: ignore[no-any-return]
+        upgraded_code,
         remove_all_unused_imports=True,
     )
 
