@@ -32,18 +32,14 @@ def _upgrade(code: str, min_version: VersionTuple) -> str:
     )
 
 
-def _build_tabs(versioned_code: VersionedCode) -> str:
+def _build_tabs(versioned_code: VersionedCode, head: str, tail: str) -> str:
     out = []
     for version, code in versioned_code.items():
         version_string = f"{version[0]}.{version[1]}"
-        lines = ["```python", *code.splitlines(), "```"]
+        lines = [head, *code.splitlines(), tail]
         code = "\n".join("    " + line for line in lines)
         out.append(f'=== "Python {version_string}+"\n{code}\n')
     return "\n".join(out)
-
-
-def _wrap_in_code_block(code: str) -> str:
-    return f"```python\n{code}\n```"
 
 
 def _parse_version_tuple(version: str) -> VersionTuple:
@@ -51,15 +47,15 @@ def _parse_version_tuple(version: str) -> VersionTuple:
     return int(major), int(minor)
 
 
-def _strip_indentation(lines: List[str]) -> Tuple[str, str]:
+def _strip_indentation(lines: List[str]) -> Tuple[List[str], str]:
     if not lines:
-        return "", ""
+        return [], ""
     first_line = lines[0]
     indent_char = ""
     if first_line[0] in [" ", "\t"]:
         indent_char = first_line[0]
     indent = indent_char * (len(first_line) - len(first_line.lstrip(indent_char)))
-    return "\n".join(line.removeprefix(indent) for line in lines), indent
+    return [line.removeprefix(indent) for line in lines], indent
 
 
 def _add_indentation(code: str, indentation: str) -> str:
@@ -95,7 +91,9 @@ class UpgradePreprocessor(Preprocessor):
 
     def convert_blocks(self, block: List[str]) -> str:
         versioned_code: VersionedCode = {}
-        code, indentation = _strip_indentation(block)
+        block, indentation = _strip_indentation(block)
+        head, *code_lines, tail = block
+        code = "\n".join(code_lines)
         latest_code = code
         versioned_code[self.versions[0]] = code
 
@@ -106,9 +104,9 @@ class UpgradePreprocessor(Preprocessor):
                 latest_code = upgraded_code
 
         if len(versioned_code) > 1:
-            code = _build_tabs(versioned_code)
+            code = _build_tabs(versioned_code, head=head, tail=tail)
         else:
-            code = _wrap_in_code_block(versioned_code[self.versions[0]])
+            code = "\n".join([head, versioned_code[self.versions[0]], tail])
 
         code = _add_indentation(code, indentation)
 
@@ -139,7 +137,7 @@ class UpgradePreprocessor(Preprocessor):
                     block = lines[start : i + 1]
                     block_directive = _get_pytabs_directive(lines[start - 1])
                     if enabled and block_directive != "disable-block":
-                        block = self.convert_blocks(block[1:-1]).splitlines()
+                        block = self.convert_blocks(block).splitlines()
                     new_lines.extend(block)
                 else:
                     new_lines.append(line)

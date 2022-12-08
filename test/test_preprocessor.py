@@ -3,14 +3,14 @@ from auto_pytabs import UpgradePreprocessor
 
 def test_upgrade_single_version():
     ext = UpgradePreprocessor(min_version=(3, 9), max_version=(3, 11))
-    source = """```python
+    source = """```python foo="bar"
 from typing import Set
 
 def bar(baz: str) -> Set[str]:
     ...
 ```
 """
-    expected_output = """```python
+    expected_output = """```python foo="bar"
 
 def bar(baz: str) -> set[str]:
     ...
@@ -22,7 +22,7 @@ def bar(baz: str) -> set[str]:
 
 def test_upgrade():
     ext = UpgradePreprocessor(min_version=(3, 7), max_version=(3, 11))
-    source = """```python
+    source = """```python foo="bar"
 from typing import Set, Optional
 
 def bar(baz: Optional[str]) -> Set[str]:
@@ -31,7 +31,7 @@ def bar(baz: Optional[str]) -> Set[str]:
 """
 
     expected_output = """=== "Python 3.7+"
-    ```python
+    ```python foo="bar"
     from typing import Set, Optional
     
     def bar(baz: Optional[str]) -> Set[str]:
@@ -39,7 +39,7 @@ def bar(baz: Optional[str]) -> Set[str]:
     ```
 
 === "Python 3.9+"
-    ```python
+    ```python foo="bar"
     from typing import Optional
     
     def bar(baz: Optional[str]) -> set[str]:
@@ -47,7 +47,7 @@ def bar(baz: Optional[str]) -> Set[str]:
     ```
 
 === "Python 3.10+"
-    ```python
+    ```python foo="bar"
     
     def bar(baz: str | None) -> set[str]:
         ...
