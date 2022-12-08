@@ -35,13 +35,16 @@ def _upgrade(code: str, min_version: VersionTuple) -> str:
     )
 
 
-def _build_tabs(versioned_code: VersionedCode, head: str, tail: str) -> str:
+def _build_tabs(
+    *, versioned_code: VersionedCode, head: str, tail: str, tab_title_template: str
+) -> str:
     out = []
     for version, code in versioned_code.items():
         version_string = f"{version[0]}.{version[1]}"
         lines = [head, *code.splitlines(), tail]
         code = "\n".join("    " + line for line in lines)
-        out.append(f'=== "Python {version_string}+"\n{code}\n')
+        tab_title = tab_title_template.format(min_version=version_string)
+        out.append(f'=== "{tab_title}"\n{code}\n')
     return "\n".join(out)
 
 
@@ -81,6 +84,7 @@ class UpgradePreprocessor(Preprocessor):
         *args: Any,
         min_version: VersionTuple,
         max_version: VersionTuple,
+        tab_title_template: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         self.min_version = min_version
@@ -90,6 +94,7 @@ class UpgradePreprocessor(Preprocessor):
             for major in range(min_version[0], max_version[0] + 1)
             for minor in range(min_version[1], max_version[1] + 1)
         ]
+        self.tab_title_template = tab_title_template or "Python {min_version}+"
         super().__init__(*args, **kwargs)
 
     def convert_blocks(self, block: List[str]) -> str:
@@ -107,7 +112,12 @@ class UpgradePreprocessor(Preprocessor):
                 latest_code = upgraded_code
 
         if len(versioned_code) > 1:
-            code = _build_tabs(versioned_code, head=head, tail=tail)
+            code = _build_tabs(
+                versioned_code=versioned_code,
+                head=head,
+                tail=tail,
+                tab_title_template=self.tab_title_template,
+            )
         else:
             code = "\n".join([head, versioned_code[self.versions[0]], tail])
 
@@ -156,6 +166,7 @@ class UpgradeExtension(Extension):
         self.config = {
             "min_version": ["3.7", "minimum version"],
             "max_version": ["3.11", "maximum version"],
+            "tab_title_template": ["", "tab title format-string"],
         }
         super().__init__(*args, **kwargs)
 
@@ -169,6 +180,7 @@ class UpgradeExtension(Extension):
             UpgradePreprocessor(
                 min_version=_parse_version_tuple(config["min_version"]),
                 max_version=_parse_version_tuple(config["max_version"]),
+                tab_title_template=config["tab_title_template"],
             ),
             "auto-pytabs",
             32,

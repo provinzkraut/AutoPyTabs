@@ -57,6 +57,40 @@ def bar(baz: Optional[str]) -> Set[str]:
     assert output == expected_output
 
 
+def test_upgrade_custom_tab_title():
+    ext = UpgradePreprocessor(
+        min_version=(3, 7),
+        max_version=(3, 11),
+        tab_title_template="Python {min_version} and above",
+    )
+    source = """```python foo="bar"
+from typing import Set
+
+def bar(baz: Set[str]) -> Set[str]:
+    ...
+```
+"""
+
+    expected_output = """=== "Python 3.7 and above"
+    ```python foo="bar"
+    from typing import Set
+    
+    def bar(baz: Set[str]) -> Set[str]:
+        ...
+    ```
+
+=== "Python 3.9 and above"
+    ```python foo="bar"
+    
+    def bar(baz: set[str]) -> set[str]:
+        ...
+    ```"""
+
+    output = "\n".join(ext.run(source.splitlines()))
+    # breakpoint()
+    assert output == expected_output
+
+
 def test_nested_tabs():
     source = """=== "Level 1"
     === "Level 2"

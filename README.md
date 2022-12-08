@@ -146,7 +146,9 @@ If the `pymdownx.snippets` extension is used, make sure that it runs **before** 
 
 ## Configuration
 
-|                               |                                   |
-|-------------------------------|-----------------------------------|
-| min_version (default: `3.7`)  | Minimum Python version to support |
-| max_version (default: `3.11`) | Maximum Python version to support |
+|                                                         |                                             |
+|---------------------------------------------------------|---------------------------------------------|
+| min_version (default: `3.7`)                            | Minimum Python version to support           |
+| max_version (default: `3.11`)                           | Maximum Python version to support           |
+| tab_title_template (default: `"Python {min_version}+"`) | Python format string to generate tab titles |
+
