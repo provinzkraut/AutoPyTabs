@@ -2,7 +2,7 @@ from auto_pytabs import UpgradePreprocessor
 
 
 def test_upgrade_single_version():
-    ext = UpgradePreprocessor(min_version=(3, 9), max_version=(3, 11))
+    ext = UpgradePreprocessor(min_version="3.9", max_version="3.11")
     source = """```python foo="bar"
 from typing import Set
 
@@ -21,7 +21,7 @@ def bar(baz: str) -> set[str]:
 
 
 def test_upgrade():
-    ext = UpgradePreprocessor(min_version=(3, 7), max_version=(3, 11))
+    ext = UpgradePreprocessor(min_version="3.7", max_version="3.11")
     source = """```python foo="bar"
 from typing import Set, Optional
 
@@ -59,8 +59,8 @@ def bar(baz: Optional[str]) -> Set[str]:
 
 def test_upgrade_custom_tab_title():
     ext = UpgradePreprocessor(
-        min_version=(3, 7),
-        max_version=(3, 11),
+        min_version="3.7",
+        max_version="3.11",
         tab_title_template="Python {min_version} and above",
     )
     source = """```python foo="bar"
@@ -119,7 +119,7 @@ def test_nested_tabs():
                     pass
             ```"""
 
-    ext = UpgradePreprocessor(min_version=(3, 7), max_version=(3, 11))
+    ext = UpgradePreprocessor(min_version="3.7", max_version="3.11")
     output = "\n".join(ext.run(source.splitlines()))
     assert output == expected_output
 
@@ -151,7 +151,7 @@ x: List[str]
     ```python
     y: set[str]
     ```"""
-    ext = UpgradePreprocessor(min_version=(3, 7), max_version=(3, 11))
+    ext = UpgradePreprocessor(min_version="3.7", max_version="3.11")
     output = "\n".join(ext.run(source.splitlines()))
     assert output == expected_output
 
@@ -195,7 +195,7 @@ y: Set[str]
     ```python
     z: dict[str, str]
     ```"""
-    ext = UpgradePreprocessor(min_version=(3, 7), max_version=(3, 11))
+    ext = UpgradePreprocessor(min_version="3.7", max_version="3.11")
     output = "\n".join(ext.run(source.splitlines()))
     assert output == expected_output
 
@@ -205,6 +205,6 @@ def test_ignore_fenced_block():
 {"foo": "bar"}
 ```"""
 
-    ext = UpgradePreprocessor(min_version=(3, 7), max_version=(3, 11))
+    ext = UpgradePreprocessor(min_version="3.7", max_version="3.11")
     output = "\n".join(ext.run(source.splitlines()))
     assert output == source

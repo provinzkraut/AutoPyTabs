@@ -10,9 +10,9 @@ From python
 
 ```python
 from markdown import markdown
-from auto_pytabs import UpgradeExtension
+from auto_pytabs import AutoPyTabsExtension
 
-markdown("...", extensions=[UpgradeExtension(min_version="3.8"), "pymdownx.tabbed"])
+markdown("...", extensions=[AutoPyTabsExtension(min_version="3.8"), "pymdownx.tabbed"])
 ```
 
 Integrated in mkdocs:
