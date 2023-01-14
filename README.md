@@ -1,21 +1,15 @@
 # Auto PyTabs
 
-A markdown extension to automatically generate 
-[pymdown tabs](https://facelessuser.github.io/pymdown-extensions/extensions/tabbed/)
-for different Python versions using [pyupgrade](https://github.com/asottile/pyupgrade).
+Automatically generate tabbed code examples for [mkdocs](https://www.mkdocs.org)
+and [Sphinx](https://www.sphinx-doc.org) based documentations, 
+making use of [pymdown tabs](https://facelessuser.github.io/pymdown-extensions/extensions/tabbed/) and
+[Sphinx design](https://sphinx-design.readthedocs.io/en/latest/tabs.html) respectively.
+
 
 ## Usage
 
-From python
 
-```python
-from markdown import markdown
-from auto_pytabs import AutoPyTabsExtension
-
-markdown("...", extensions=[AutoPyTabsExtension(min_version="3.8"), "pymdownx.tabbed"])
-```
-
-Integrated in mkdocs:
+### Mkdocs
 
 ```yaml
 site_name: My Docs
@@ -25,11 +19,26 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.snippets
-  - auto_pytabs:
-      min_version: "3.8"
+  - auto_pytabs.markdown_ext:
+      min_version: "3.7"  # optional
+      max_version: "3.11" # optional
+      tab_title_template: "Python {min_version}+"  # optional
 ```
 
-## Example
+### Sphinx
+
+```python
+extensions = ["auto_pytabs.sphinx_ext"]
+
+auto_pytabs_min_version = (3, 7)  # optional
+auto_pytabs_max_version = (3, 11)  # optional
+auto_pytabs_tab_title_template = "Python {min_version}+"  # optional 
+auto_pytabs_no_cache = True  # disabled file system cache
+```
+
+## Examples
+
+### Markdown
 
 **Input**
 
@@ -70,7 +79,7 @@ def foo(bar: Optional[str]) -> Dict[str, str]:
 </pre>
 
 
-### Nested blocks
+#### Nested blocks
 
 Nested tabs are supported as well:
 
@@ -121,7 +130,7 @@ Nested tabs are supported as well:
     
 </pre>
 
-## Selectively disable
+### Selectively disable
 
 You can disable conversion for a single code block:
 
@@ -140,15 +149,7 @@ Or for whole sections / files
     <!-- autopytabs: enable -->
     re-enables conversion again
 
-## Compatibility with `pymdownx.snippets`
+### Compatibility with `pymdownx.snippets`
 
 If the `pymdownx.snippets` extension is used, make sure that it runs **before** AutoPyTab
-
-## Configuration
-
-|                                                         |                                             |
-|---------------------------------------------------------|---------------------------------------------|
-| min_version (default: `3.7`)                            | Minimum Python version to support           |
-| max_version (default: `3.11`)                           | Maximum Python version to support           |
-| tab_title_template (default: `"Python {min_version}+"`) | Python format string to generate tab titles |
 
