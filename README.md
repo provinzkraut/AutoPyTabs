@@ -6,6 +6,11 @@ making use of [pymdown tabs](https://facelessuser.github.io/pymdown-extensions/e
 [Sphinx design](https://sphinx-design.readthedocs.io/en/latest/tabs.html) respectively.
 
 
+# Work in progress
+
+This library is work in progress. Approach with caution
+
+
 ## Usage
 
 
