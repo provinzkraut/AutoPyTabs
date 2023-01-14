@@ -1,4 +1,4 @@
-from auto_pytabs import UpgradePreprocessor
+from auto_pytabs.markdown_ext import UpgradePreprocessor
 
 
 def test_upgrade_single_version():
