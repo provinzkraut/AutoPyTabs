@@ -10,17 +10,22 @@ packages = [{ include = "auto_pytabs" }]
 python = "^3.8"
 pyupgrade = "^3.3.1"
 autoflake = "^2.0.0"
-mkdocs = "^1.4.2"
-pymdown-extensions = "^9.9"
+mkdocs = {version = "^1.4.2", optional = true }
+sphinx = {version = "^6.1.3", optional = true}
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
 mypy = "^0.990"
 types-markdown = "^3.4.2.1"
 pytest = "^7.2.0"
-mkdocs-material = "^8.5.10"
 mkdocs = "^1.4.2"
 sphinx = "^6.1.3"
+pymdown-extensions = "^9.9"
+
+
+[tool.poetry.extras]
+sphinx = ["sphinx"]
+mkdocs = ["mkdocs"]
 
 
 [tool.poetry.plugins."mkdocs.plugins"]
