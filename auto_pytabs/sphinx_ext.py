@@ -79,7 +79,10 @@ class UpgradeMixin(SphinxDirective):
             ).hexdigest()
             cache_file = CACHE_DIR / cache_filename
             if cache_file.exists():
-                return pickle.loads(cache_file.read_bytes())
+                try:
+                    return pickle.loads(cache_file.read_bytes())
+                except pickle.PickleError:
+                    cache_file.unlink()
 
         versioned_code = create_versioned_code(code, version_requirements)
         tabs = self._create_tabs(
@@ -98,7 +101,11 @@ class UpgradeMixin(SphinxDirective):
         nodes = node.children
 
         if cache_file:
-            cache_file.write_bytes(pickle.dumps(nodes))
+            try:
+                cache_file.write_bytes(pickle.dumps(nodes))
+            except pickle.PicklingError:
+                if cache_file.exists():
+                    cache_file.unlink()
 
         return nodes
 
