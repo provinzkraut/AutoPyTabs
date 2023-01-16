@@ -30,6 +30,7 @@ class PluginConfig(Config):  # type: ignore[no-untyped-call]
     max_version = config_options.Type(str, default="3.11")
     tmp_path = config_options.Type(Path, default=Path(".autopytabs_tmp"))
     tab_title_template = config_options.Type(str, default="Python {min_version}+")
+    no_cache = config_options.Type(bool, default=False)
 
 
 class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-call]
@@ -55,6 +56,7 @@ class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-cal
             block=block,
             versions=self.versions,
             tab_title_template=self.config.tab_title_template,
+            no_cache=self.config.no_cache,
         )
 
     def _transform_pending(

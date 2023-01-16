@@ -8,7 +8,7 @@ TEST_DATA_DIR = Path("test/md_ext_test_data")
 
 @pytest.fixture()
 def preprocessor() -> UpgradePreprocessor:
-    return UpgradePreprocessor(min_version="3.7", max_version="3.11")
+    return UpgradePreprocessor(min_version="3.7", max_version="3.11", no_cache=True)
 
 
 def get_test_data(name: str) -> tuple[str, str]:
@@ -19,7 +19,9 @@ def get_test_data(name: str) -> tuple[str, str]:
 
 def test_upgrade_single_version(file_regression):
     source, expected_output = get_test_data("upgrade_single")
-    preprocessor = UpgradePreprocessor(min_version="3.9", max_version="3.11")
+    preprocessor = UpgradePreprocessor(
+        min_version="3.9", max_version="3.11", no_cache=True
+    )
 
     output = "\n".join(preprocessor.run(source.splitlines()))
     assert output == expected_output
@@ -37,6 +39,7 @@ def test_upgrade_custom_tab_title():
         min_version="3.7",
         max_version="3.11",
         tab_title_template="Python {min_version} and above",
+        no_cache=True,
     )
     source, expected_output = get_test_data("custom_tab_title")
 

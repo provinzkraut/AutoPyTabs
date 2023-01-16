@@ -109,11 +109,12 @@ def convert_block(
     block: list[str],
     versions: list[tuple[int, int]],
     tab_title_template: str,
+    no_cache: bool,
 ) -> str:
     block, indentation = _strip_indentation(block)
     head, *code_lines, tail = block
     code = "\n".join(code_lines)
-    versioned_code = version_code(code, versions)
+    versioned_code = version_code(code, versions, no_cache=no_cache)
 
     if len(versioned_code) > 1:
         code = _build_tabs(
@@ -137,10 +138,12 @@ class UpgradePreprocessor(Preprocessor):
         min_version: str,
         max_version: str,
         tab_title_template: str | None = None,
+        no_cache: bool = False,
         **kwargs: Any,
     ) -> None:
         self.versions = parse_version_requirements(min_version, max_version)
         self.tab_title_template = tab_title_template or "Python {min_version}+"
+        self.no_cache = no_cache
         super().__init__(*args, **kwargs)
 
     def run(self, lines: list[str]) -> list[str]:
@@ -154,6 +157,7 @@ class UpgradePreprocessor(Preprocessor):
                     block=block_to_transform,
                     versions=self.versions,
                     tab_title_template=self.tab_title_template,
+                    no_cache=self.no_cache,
                 ).splitlines()
                 output_lines.extend(transformed_block)
             else:
@@ -170,6 +174,7 @@ class AutoPyTabsExtension(Extension):
             "min_version": ["3.7", "minimum version"],
             "max_version": ["3.11", "maximum version"],
             "tab_title_template": ["", "tab title format-string"],
+            "no_cache": [False, "disable caching"],
         }
         super().__init__(*args, **kwargs)
 
