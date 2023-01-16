@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-import pickle
-from hashlib import sha1
-from pathlib import Path
-from typing import Any, Iterable, TYPE_CHECKING
+from typing import Any, Iterable, TYPE_CHECKING, cast
 
 from docutils.nodes import Node, section
 from docutils.parsers.rst import directives
@@ -13,14 +10,11 @@ from sphinx.directives.code import CodeBlock, LiteralInclude
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.nodes import nested_parse_with_titles
 
-from auto_pytabs.core import create_versioned_code
+from auto_pytabs.core import version_code, get_version_requirements
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
     from auto_pytabs.types import VersionedCode
-
-
-CACHE_DIR = Path(".auto_pytabs_cache")
 
 
 def indent(string: str, indent_char: str = " ", level: int = 4) -> list[str]:
@@ -30,7 +24,10 @@ def indent(string: str, indent_char: str = " ", level: int = 4) -> list[str]:
 class UpgradeMixin(SphinxDirective):
     def _render_directive_options(self) -> str:
         ret = ""
-        options: dict[str, Any] = {**self.options, "no-upgrade": True}
+        options: dict[str, Any] = {"no-upgrade": True}
+        options.update(
+            {k: v for k, v in self.options.items() if k in CodeBlock.option_spec}
+        )
         for option, value in options.items():
             if self.option_spec[option] is directives.flag:
                 value = None
@@ -72,19 +69,9 @@ class UpgradeMixin(SphinxDirective):
 
     def _create_py_tab_nodes(self, code: str) -> list[Node]:
         version_requirements = self.config["auto_pytabs_versions"]
-        cache_file: Path | None = None
-        if not self.config["auto_pytabs_no_cache"]:
-            cache_filename = sha1(
-                (code + str(version_requirements)).encode()
-            ).hexdigest()
-            cache_file = CACHE_DIR / cache_filename
-            if cache_file.exists():
-                try:
-                    return pickle.loads(cache_file.read_bytes())
-                except pickle.PickleError:
-                    cache_file.unlink()
-
-        versioned_code = create_versioned_code(code, version_requirements)
+        versioned_code = version_code(
+            code, version_requirements, no_cache=self.config["auto_pytabs_no_cache"]
+        )
         tabs = self._create_tabs(
             versioned_code, self.env.config["auto_pytabs_tab_title_template"]
         )
@@ -100,14 +87,7 @@ class UpgradeMixin(SphinxDirective):
         nested_parse_with_titles(self.state, rst, node)
         nodes = node.children
 
-        if cache_file:
-            try:
-                cache_file.write_bytes(pickle.dumps(nodes))
-            except pickle.PicklingError:
-                if cache_file.exists():
-                    cache_file.unlink()
-
-        return nodes
+        return cast(list[Node], nodes)
 
 
 class UpgradeCodeBlock(CodeBlock, UpgradeMixin):
@@ -127,19 +107,13 @@ class UpgradeLiteralInclude(LiteralInclude, UpgradeMixin):
         base_node = super().run()[0]
         if "no-upgrade" in self.options or self.options.get("language") != "python":
             return [base_node]
-        return self._create_py_tab_nodes(base_node.rawsource)
+        return self._create_py_tab_nodes(base_node.rawsource)  # type: ignore[attr-defined]
 
 
 def on_config_inited(app: Sphinx, config: Config) -> None:
-    min_major, min_minor = config["auto_pytabs_min_version"]
-    max_major, max_minor = config["auto_pytabs_max_version"]
-    config["auto_pytabs_versions"] = [
-        (major, minor)
-        for major in range(min_major, max_major + 1)
-        for minor in range(min_minor, max_minor + 1)
-    ]
-
-    CACHE_DIR.mkdir(exist_ok=True)
+    config["auto_pytabs_versions"] = get_version_requirements(
+        config["auto_pytabs_min_version"], config["auto_pytabs_max_version"]
+    )
 
 
 def setup(app: Sphinx) -> dict[str, bool | str]:

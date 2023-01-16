@@ -1,0 +1,64 @@
+<document source="index">
+    <section ids="index" names="index">
+        <title>
+            Index
+        <section ids="code-block" names="code-block">
+            <title>
+                code-block
+            <container classes="sd-tab-set" design_component="tab-set" is_div="True">
+                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
+                    <rubric classes="sd-tab-label" sync_id="3.8">
+                        Python 3.8+
+                    <container classes="sd-tab-content" design_component="tab-content" is_div="True">
+                        <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
+                            from typing import Dict, Union, List, Optional
+                            
+                            def foo(x: Union[Dict[str, str], List[str]]) -> Optional[List[int]]:
+                                pass
+                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
+                    <rubric classes="sd-tab-label" sync_id="3.9">
+                        Python 3.9+
+                    <container classes="sd-tab-content" design_component="tab-content" is_div="True">
+                        <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
+                            from typing import Optional, Union
+                            
+                            def foo(x: Union[dict[str, str], list[str]]) -> Optional[list[int]]:
+                                pass
+                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
+                    <rubric classes="sd-tab-label" sync_id="3.10">
+                        Python 3.10+
+                    <container classes="sd-tab-content" design_component="tab-content" is_div="True">
+                        <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
+                            def foo(x: dict[str, str] | list[str]) -> list[int] | None:
+                                pass
+        <section ids="literalinclude" names="literalinclude">
+            <title>
+                literalinclude
+            <container classes="sd-tab-set" design_component="tab-set" is_div="True">
+                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
+                    <rubric classes="sd-tab-label" sync_id="3.8">
+                        Python 3.8+
+                    <container classes="sd-tab-content" design_component="tab-content" is_div="True">
+                        <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
+                            from typing import Dict, Union, List, Optional
+                            
+                            
+                            def foo(x: Union[Dict[str, str], List[str]]) -> Optional[List[int]]:
+                                pass
+                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
+                    <rubric classes="sd-tab-label" sync_id="3.9">
+                        Python 3.9+
+                    <container classes="sd-tab-content" design_component="tab-content" is_div="True">
+                        <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
+                            from typing import Optional, Union
+                            
+                            
+                            def foo(x: Union[dict[str, str], list[str]]) -> Optional[list[int]]:
+                                pass
+                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
+                    <rubric classes="sd-tab-label" sync_id="3.10">
+                        Python 3.10+
+                    <container classes="sd-tab-content" design_component="tab-content" is_div="True">
+                        <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
+                            def foo(x: dict[str, str] | list[str]) -> list[int] | None:
+                                pass

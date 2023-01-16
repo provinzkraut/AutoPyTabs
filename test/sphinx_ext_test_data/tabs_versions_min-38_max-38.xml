@@ -1,0 +1,21 @@
+<document source="index">
+    <section ids="index" names="index">
+        <title>
+            Index
+        <section ids="code-block" names="code-block">
+            <title>
+                code-block
+            <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
+                from typing import Dict, Union, List, Optional
+                
+                def foo(x: Union[Dict[str, str], List[str]]) -> Optional[List[int]]:
+                    pass
+        <section ids="literalinclude" names="literalinclude">
+            <title>
+                literalinclude
+            <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
+                from typing import Dict, Union, List, Optional
+                
+                
+                def foo(x: Union[Dict[str, str], List[str]]) -> Optional[List[int]]:
+                    pass
