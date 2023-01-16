@@ -1,12 +1,13 @@
+from __future__ import annotations
+
 import concurrent.futures
 import re
 import secrets
 import shutil
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any, Dict, List, Literal, NamedTuple, Optional, Set, Tuple, cast
+from typing import Any, Literal, NamedTuple, TYPE_CHECKING, cast
 
-import autoflake  # type: ignore
 import markdown
 from markdown import Extension
 from markdown.preprocessors import Preprocessor
@@ -14,16 +15,19 @@ from mkdocs.config import Config, config_options
 from mkdocs.config.defaults import MkDocsConfig
 from mkdocs.plugins import BasePlugin
 from mkdocs.structure.files import File, Files
-from pymdownx import snippets
 
-from auto_pytabs.core import create_versioned_code
+from auto_pytabs.core import version_code, get_version_requirements
 from auto_pytabs.types import VersionTuple, VersionedCode
+
+if TYPE_CHECKING:
+    from pymdownx.snippets import SnippetPreprocessor
+
 
 RGX_BLOCK_TOKENS = re.compile(r"(.*```py[\w\W]*)|(.*```)")
 RGX_PYTABS_DIRECTIVE = re.compile(r"<!-- ?autopytabs: ?(.*)-->")
 
 PyTabDirective = Literal["disable", "enable", "disable-block"]
-PYTAB_DIRECTIVES: Set[PyTabDirective] = {"disable", "enable", "disable-block"}
+PYTAB_DIRECTIVES: set[PyTabDirective] = {"disable", "enable", "disable-block"}
 
 
 def parse_version_tuple(version: str) -> VersionTuple:
@@ -33,18 +37,13 @@ def parse_version_tuple(version: str) -> VersionTuple:
 
 def parse_version_requirements(
     min_version: str, max_version: str
-) -> List[VersionTuple]:
-    min_major, min_minor = parse_version_tuple(min_version)
-    max_major, max_minor = parse_version_tuple(max_version)
-    res = [
-        (major, minor)
-        for major in range(min_major, max_major + 1)
-        for minor in range(min_minor, max_minor + 1)
-    ]
-    return res
+) -> list[VersionTuple]:
+    return get_version_requirements(
+        parse_version_tuple(min_version), parse_version_tuple(max_version)
+    )
 
 
-def strip_indentation(lines: List[str]) -> Tuple[List[str], str]:
+def strip_indentation(lines: list[str]) -> tuple[list[str], str]:
     if not lines:
         return [], ""
     first_line = lines[0]
@@ -59,7 +58,7 @@ def add_indentation(code: str, indentation: str) -> str:
     return "\n".join(indentation + line for line in code.splitlines())
 
 
-def _get_pytabs_directive(line: str) -> Optional[PyTabDirective]:
+def _get_pytabs_directive(line: str) -> PyTabDirective | None:
     match = RGX_PYTABS_DIRECTIVE.match(line)
     if match:
         matched_directive = match.group(1).strip()
@@ -69,10 +68,10 @@ def _get_pytabs_directive(line: str) -> Optional[PyTabDirective]:
     return None
 
 
-def _extract_code_blocks(lines: List[str]) -> Tuple[List[str], Dict[int, List[str]]]:
+def _extract_code_blocks(lines: list[str]) -> tuple[list[str], dict[int, list[str]]]:
     in_block = False
     enabled = True
-    new_lines: List[str] = []
+    new_lines: list[str] = []
 
     to_transform = {}
 
@@ -124,14 +123,14 @@ def _build_tabs(
 
 def _convert_block(
     *,
-    block: List[str],
-    versions: List[Tuple[int, int]],
+    block: list[str],
+    versions: list[tuple[int, int]],
     tab_title_template: str,
 ) -> str:
     block, indentation = strip_indentation(block)
     head, *code_lines, tail = block
     code = "\n".join(code_lines)
-    versioned_code = create_versioned_code(code, versions)
+    versioned_code = version_code(code, versions)
 
     if len(versioned_code) > 1:
         code = _build_tabs(
@@ -154,14 +153,14 @@ class UpgradePreprocessor(Preprocessor):
         *args: Any,
         min_version: str,
         max_version: str,
-        tab_title_template: Optional[str] = None,
+        tab_title_template: str | None = None,
         **kwargs: Any,
     ) -> None:
         self.versions = parse_version_requirements(min_version, max_version)
         self.tab_title_template = tab_title_template or "Python {min_version}+"
         super().__init__(*args, **kwargs)
 
-    def run(self, lines: List[str]) -> List[str]:
+    def run(self, lines: list[str]) -> list[str]:
         new_lines, to_transform = _extract_code_blocks(lines)
 
         output_lines = []
@@ -214,15 +213,15 @@ def makeExtension(**kwargs: Any) -> AutoPyTabsExtension:
 
 class PendingTransformation(NamedTuple):
     tmp_docs_file: Path
-    new_lines: List[str]
-    to_upgrade: Dict[int, List[str]]
+    new_lines: list[str]
+    to_upgrade: dict[int, list[str]]
 
 
 def _extract_blocks_from_file(
     docs_file: File,
     tmp_path: Path,
-    snippets_preprocessor: Optional[snippets.SnippetPreprocessor] = None,
-) -> Optional[PendingTransformation]:
+    snippets_preprocessor: SnippetPreprocessor | None = None,
+) -> PendingTransformation | None:
     content = Path(docs_file.abs_src_path).read_text().splitlines()
     if snippets_preprocessor:
         content = snippets_preprocessor.run(content)
@@ -255,10 +254,10 @@ class PluginConfig(Config):  # type: ignore[no-untyped-call]
 
 class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-call]
     def __init__(self) -> None:
-        self.versions: List[VersionTuple] = []
-        self.snippets_processor: Optional[snippets.SnippetPreprocessor] = None
+        self.versions: list[VersionTuple] = []
+        self.snippets_processor: SnippetPreprocessor | None = None
 
-    def on_config(self, config: MkDocsConfig) -> Optional[Config]:
+    def on_config(self, config: MkDocsConfig) -> Config | None:
         min_version = parse_version_tuple(self.config.min_version)
         max_version = parse_version_tuple(self.config.max_version)
         self.versions = [
@@ -275,7 +274,7 @@ class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-cal
             self.snippets_processor = md.preprocessors["snippet"]
         return None
 
-    def _convert_block(self, block: List[str]) -> str:
+    def _convert_block(self, block: list[str]) -> str:
         return _convert_block(
             block=block,
             versions=self.versions,
