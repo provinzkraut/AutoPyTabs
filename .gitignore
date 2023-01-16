@@ -156,3 +156,4 @@ cython_debug/
 .idea/
 /.python-version
 /.auto_pytabs_cache/
+/.ruff_cache/

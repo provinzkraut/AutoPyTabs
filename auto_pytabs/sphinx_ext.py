@@ -55,7 +55,7 @@ class UpgradeMixin(SphinxDirective):
             version_string = f"{version[0]}.{version[1]}"
             out.extend(
                 [
-                    f"    .. tab-item:: {tab_title_template.format(min_version=version_string)}",
+                    f"    .. tab-item:: {tab_title_template.format(min_version=version_string)}",  # noqa: E501
                     f"        :sync: {version_string}",
                     "",
                     "        .. code-block:: python",
@@ -107,7 +107,7 @@ class UpgradeLiteralInclude(LiteralInclude, UpgradeMixin):
         base_node = super().run()[0]
         if "no-upgrade" in self.options or self.options.get("language") != "python":
             return [base_node]
-        return self._create_py_tab_nodes(base_node.rawsource)  # type: ignore[attr-defined]
+        return self._create_py_tab_nodes(base_node.rawsource)  # type: ignore[attr-defined]   # noqa: E501
 
 
 def on_config_inited(app: Sphinx, config: Config) -> None:

@@ -20,7 +20,7 @@ from auto_pytabs.core import version_code, get_version_requirements
 from auto_pytabs.types import VersionTuple, VersionedCode
 
 if TYPE_CHECKING:
-    from pymdownx.snippets import SnippetPreprocessor
+    from pymdownx.snippets import SnippetPreprocessor  # type: ignore
 
 
 RGX_BLOCK_TOKENS = re.compile(r"(.*```py[\w\W]*)|(.*```)")
@@ -238,11 +238,6 @@ def _extract_blocks_from_file(
         new_lines=new_lines,
         to_upgrade=to_upgrade,
     )
-
-
-class _VersionTuple:
-    def __init__(self, data: str) -> None:
-        self.major, self.minor = parse_version_tuple(data)
 
 
 class PluginConfig(Config):  # type: ignore[no-untyped-call]

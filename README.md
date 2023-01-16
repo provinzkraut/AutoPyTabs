@@ -1,18 +1,15 @@
 # Auto PyTabs
 
 Automatically generate tabbed code examples for [mkdocs](https://www.mkdocs.org)
-and [Sphinx](https://www.sphinx-doc.org) based documentations, 
+and [Sphinx](https://www.sphinx-doc.org) based documentations,
 making use of [pymdown tabs](https://facelessuser.github.io/pymdown-extensions/extensions/tabbed/) and
 [Sphinx design](https://sphinx-design.readthedocs.io/en/latest/tabs.html) respectively.
-
 
 # Work in progress
 
 This library is work in progress. Approach with caution
 
-
 ## Usage
-
 
 ### Mkdocs
 
@@ -83,12 +80,12 @@ def foo(bar: Optional[str]) -> Dict[str, str]:
     ```
 </pre>
 
-
 #### Nested blocks
 
 Nested tabs are supported as well:
 
 **Input**
+
 <pre>
 === "Level 1-1"
 
@@ -139,22 +136,25 @@ Nested tabs are supported as well:
 
 You can disable conversion for a single code block:
 
-    <!-- autopytabs: disable-block -->
-    ```python
-    from typing import Set, Optional
-    
-    def bar(baz: Optional[str]) -> Set[str]:
-        ...
-    ```
+````
+<!-- autopytabs: disable-block -->
+```python
+from typing import Set, Optional
+
+def bar(baz: Optional[str]) -> Set[str]:
+    ...
+```
+````
 
 Or for whole sections / files
 
-    <!-- autopytabs: disable -->
-    everything after this will be ignored
-    <!-- autopytabs: enable -->
-    re-enables conversion again
+```
+<!-- autopytabs: disable -->
+everything after this will be ignored
+<!-- autopytabs: enable -->
+re-enables conversion again
+```
 
 ### Compatibility with `pymdownx.snippets`
 
 If the `pymdownx.snippets` extension is used, make sure that it runs **before** AutoPyTab
-
