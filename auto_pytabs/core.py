@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from hashlib import sha1
 from pathlib import Path
 
@@ -61,15 +63,3 @@ def version_code(
             latest_code = upgraded_code
 
     return versioned_code
-
-
-def get_version_requirements(
-    min_version: VersionTuple, max_version: VersionTuple
-) -> list[VersionTuple]:
-    min_major, min_minor = min_version
-    max_major, max_minor = max_version
-    return [
-        (major, minor)
-        for major in range(min_major, max_major + 1)
-        for minor in range(min_minor, max_minor + 1)
-    ]

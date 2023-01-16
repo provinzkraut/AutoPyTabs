@@ -10,7 +10,8 @@ from sphinx.directives.code import CodeBlock, LiteralInclude
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.nodes import nested_parse_with_titles
 
-from auto_pytabs.core import version_code, get_version_requirements
+from auto_pytabs.core import version_code
+from auto_pytabs.util import get_version_requirements
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx

@@ -31,7 +31,7 @@ mkdocs = ["mkdocs"]
 
 
 [tool.poetry.plugins."mkdocs.plugins"]
-auto_pytabs = "auto_pytabs.markdown_ext:AutoPyTabsPlugin"
+auto_pytabs = "auto_pytabs.mkdocs_plugin:AutoPyTabsPlugin"
 
 
 [build-system]
