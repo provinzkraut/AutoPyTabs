@@ -1,210 +1,74 @@
+from pathlib import Path
+
 from auto_pytabs.markdown_ext import UpgradePreprocessor
+import pytest
+
+TEST_DATA_DIR = Path("test/md_ext_test_data")
 
 
-def test_upgrade_single_version():
-    ext = UpgradePreprocessor(min_version="3.9", max_version="3.11")
-    source = """```python foo="bar"
-from typing import Set
+@pytest.fixture()
+def preprocessor() -> UpgradePreprocessor:
+    return UpgradePreprocessor(min_version="3.7", max_version="3.11")
 
-def bar(baz: str) -> Set[str]:
-    ...
-```
-"""
-    expected_output = """```python foo="bar"
 
-def bar(baz: str) -> set[str]:
-    ...
-```"""
+def get_test_data(name: str) -> tuple[str, str]:
+    in_file = TEST_DATA_DIR / f"{name}_in.md"
+    out_file = TEST_DATA_DIR / f"{name}_out.md"
+    return in_file.read_text(), out_file.read_text()
 
-    output = "\n".join(ext.run(source.splitlines()))
+
+def test_upgrade_single_version(file_regression):
+    source, expected_output = get_test_data("upgrade_single")
+    preprocessor = UpgradePreprocessor(min_version="3.9", max_version="3.11")
+
+    output = "\n".join(preprocessor.run(source.splitlines()))
     assert output == expected_output
 
 
-def test_upgrade():
-    ext = UpgradePreprocessor(min_version="3.7", max_version="3.11")
-    source = """```python foo="bar"
-from typing import Set, Optional
+def test_upgrade(preprocessor: UpgradePreprocessor):
+    source, expected_output = get_test_data("upgrade")
 
-def bar(baz: Optional[str]) -> Set[str]:
-    ...
-```
-"""
-
-    expected_output = """=== "Python 3.7+"
-    ```python foo="bar"
-    from typing import Set, Optional
-    
-    def bar(baz: Optional[str]) -> Set[str]:
-        ...
-    ```
-
-=== "Python 3.9+"
-    ```python foo="bar"
-    from typing import Optional
-    
-    def bar(baz: Optional[str]) -> set[str]:
-        ...
-    ```
-
-=== "Python 3.10+"
-    ```python foo="bar"
-    
-    def bar(baz: str | None) -> set[str]:
-        ...
-    ```"""
-
-    output = "\n".join(ext.run(source.splitlines()))
+    output = "\n".join(preprocessor.run(source.splitlines()))
     assert output == expected_output
 
 
 def test_upgrade_custom_tab_title():
-    ext = UpgradePreprocessor(
+    preprocessor = UpgradePreprocessor(
         min_version="3.7",
         max_version="3.11",
         tab_title_template="Python {min_version} and above",
     )
-    source = """```python foo="bar"
-from typing import Set
+    source, expected_output = get_test_data("custom_tab_title")
 
-def bar(baz: Set[str]) -> Set[str]:
-    ...
-```
-"""
-
-    expected_output = """=== "Python 3.7 and above"
-    ```python foo="bar"
-    from typing import Set
-    
-    def bar(baz: Set[str]) -> Set[str]:
-        ...
-    ```
-
-=== "Python 3.9 and above"
-    ```python foo="bar"
-    
-    def bar(baz: set[str]) -> set[str]:
-        ...
-    ```"""
-
-    output = "\n".join(ext.run(source.splitlines()))
-    # breakpoint()
+    output = "\n".join(preprocessor.run(source.splitlines()))
     assert output == expected_output
 
 
-def test_nested_tabs():
-    source = """=== "Level 1"
-    === "Level 2"
-        ```python
-        from typing import List
-        def func(x: List[str]) -> None:
-            def inner():
-                pass
-        ```
-"""
+def test_nested_tabs(preprocessor: UpgradePreprocessor):
+    source, expected_output = get_test_data("nested_tabs")
 
-    expected_output = """=== "Level 1"
-    === "Level 2"
-        === "Python 3.7+"
-            ```python
-            from typing import List
-            def func(x: List[str]) -> None:
-                def inner():
-                    pass
-            ```
-        
-        === "Python 3.9+"
-            ```python
-            def func(x: list[str]) -> None:
-                def inner():
-                    pass
-            ```"""
-
-    ext = UpgradePreprocessor(min_version="3.7", max_version="3.11")
-    output = "\n".join(ext.run(source.splitlines()))
+    output = "\n".join(preprocessor.run(source.splitlines()))
     assert output == expected_output
 
 
-def test_disable_block():
-    source = """<!-- autopytabs: disable-block -->
-```python
-from typing import List
-x: List[str]
-```
+def test_disable_block(preprocessor: UpgradePreprocessor):
+    source, expected_output = get_test_data("disable_block")
 
-```python
-from typing import Set
-y: Set[str]
-```"""
-
-    expected_output = """```python
-from typing import List
-x: List[str]
-```
-
-=== "Python 3.7+"
-    ```python
-    from typing import Set
-    y: Set[str]
-    ```
-
-=== "Python 3.9+"
-    ```python
-    y: set[str]
-    ```"""
-    ext = UpgradePreprocessor(min_version="3.7", max_version="3.11")
-    output = "\n".join(ext.run(source.splitlines()))
+    output = "\n".join(preprocessor.run(source.splitlines()))
     assert output == expected_output
 
 
-def test_disable_section():
-    source = """<!-- autopytabs: disable -->
-```python
-from typing import List
-x: List[str]
-```
+def test_disable_section(preprocessor: UpgradePreprocessor):
+    source, expected_output = get_test_data("disable_section")
 
-```python
-from typing import Set
-y: Set[str]
-```
-
-<!-- autopytabs: enable -->
-```python
-from typing import Dict
-z: Dict[str, str]
-```
-"""
-
-    expected_output = """```python
-from typing import List
-x: List[str]
-```
-
-```python
-from typing import Set
-y: Set[str]
-```
-
-=== "Python 3.7+"
-    ```python
-    from typing import Dict
-    z: Dict[str, str]
-    ```
-
-=== "Python 3.9+"
-    ```python
-    z: dict[str, str]
-    ```"""
-    ext = UpgradePreprocessor(min_version="3.7", max_version="3.11")
-    output = "\n".join(ext.run(source.splitlines()))
+    output = "\n".join(preprocessor.run(source.splitlines()))
     assert output == expected_output
 
 
-def test_ignore_fenced_block():
+def test_ignore_fenced_block(preprocessor: UpgradePreprocessor):
     source = """```json
 {"foo": "bar"}
 ```"""
 
-    ext = UpgradePreprocessor(min_version="3.7", max_version="3.11")
-    output = "\n".join(ext.run(source.splitlines()))
+    output = "\n".join(preprocessor.run(source.splitlines()))
     assert output == source
