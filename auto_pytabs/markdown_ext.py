@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Any, Literal, NamedTuple, cast
+from typing import Any, Literal, NamedTuple, cast, Set, List, Dict, Tuple
 
 import markdown
 from markdown import Extension
@@ -10,23 +10,23 @@ from markdown.preprocessors import Preprocessor
 
 from auto_pytabs.core import version_code
 from auto_pytabs.util import parse_version_requirements
-from auto_pytabs.types import VersionedCode
+from auto_pytabs.types import VersionTuple, VersionedCode
 
 
 RGX_BLOCK_TOKENS = re.compile(r"(.*```py[\w\W]*)|(.*```)")
 RGX_PYTABS_DIRECTIVE = re.compile(r"<!-- ?autopytabs: ?(.*)-->")
 
 PyTabDirective = Literal["disable", "enable", "disable-block"]
-PYTAB_DIRECTIVES: set[PyTabDirective] = {"disable", "enable", "disable-block"}
+PYTAB_DIRECTIVES: Set[PyTabDirective] = {"disable", "enable", "disable-block"}
 
 
 class PendingTransformation(NamedTuple):
     tmp_docs_file: Path
-    new_lines: list[str]
-    to_upgrade: dict[int, list[str]]
+    new_lines: List[str]
+    to_upgrade: Dict[int, List[str]]
 
 
-def _strip_indentation(lines: list[str]) -> tuple[list[str], str]:
+def _strip_indentation(lines: List[str]) -> Tuple[List[str], str]:
     if not lines:
         return [], ""
     first_line = lines[0]
@@ -34,7 +34,9 @@ def _strip_indentation(lines: list[str]) -> tuple[list[str], str]:
     if first_line[0] in [" ", "\t"]:
         indent_char = first_line[0]
     indent = indent_char * (len(first_line) - len(first_line.lstrip(indent_char)))
-    return [line.removeprefix(indent) for line in lines], indent
+    if indent:
+        return [line.split(indent, 1)[1] for line in lines], indent
+    return lines, indent
 
 
 def _add_indentation(code: str, indentation: str) -> str:
@@ -51,10 +53,10 @@ def _get_pytabs_directive(line: str) -> PyTabDirective | None:
     return None
 
 
-def extract_code_blocks(lines: list[str]) -> tuple[list[str], dict[int, list[str]]]:
+def extract_code_blocks(lines: List[str]) -> Tuple[List[str], Dict[int, List[str]]]:
     in_block = False
     enabled = True
-    new_lines: list[str] = []
+    new_lines: List[str] = []
 
     to_transform = {}
 
@@ -106,8 +108,8 @@ def _build_tabs(
 
 def convert_block(
     *,
-    block: list[str],
-    versions: list[tuple[int, int]],
+    block: List[str],
+    versions: List[VersionTuple],
     tab_title_template: str,
     no_cache: bool,
 ) -> str:
@@ -146,7 +148,7 @@ class UpgradePreprocessor(Preprocessor):
         self.no_cache = no_cache
         super().__init__(*args, **kwargs)
 
-    def run(self, lines: list[str]) -> list[str]:
+    def run(self, lines: List[str]) -> List[str]:
         new_lines, to_transform = extract_code_blocks(lines)
 
         output_lines = []

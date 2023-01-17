@@ -3,6 +3,9 @@ Largely adopted from
 https://github.com/executablebooks/sphinx-design/blob/6df47513e9e221c61877e9308da7a41d216ae3c3/tests/conftest.py
 """
 
+from __future__ import annotations
+
+
 import os
 import shutil
 from pathlib import Path

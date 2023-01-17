@@ -5,7 +5,7 @@ import secrets
 import shutil
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 import markdown
 from mkdocs.config import Config, config_options
@@ -35,7 +35,7 @@ class PluginConfig(Config):  # type: ignore[no-untyped-call]
 
 class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-call]
     def __init__(self) -> None:
-        self.versions: list[VersionTuple] = []
+        self.versions: List[VersionTuple] = []
         self.snippets_processor: SnippetPreprocessor | None = None
 
     def on_config(self, config: MkDocsConfig) -> Config | None:
@@ -51,7 +51,7 @@ class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-cal
             self.snippets_processor = md.preprocessors["snippet"]
         return None
 
-    def _convert_block(self, block: list[str]) -> str:
+    def _convert_block(self, block: List[str]) -> str:
         return convert_block(
             block=block,
             versions=self.versions,

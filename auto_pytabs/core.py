@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Dict, List
+
 from hashlib import sha1
 from pathlib import Path
 
@@ -11,7 +13,7 @@ from auto_pytabs.types import VersionTuple, VersionedCode
 
 CACHE_DIR = Path(".auto_pytabs_cache")
 
-_CODE_CACHE: dict[str, str] = {}
+_CODE_CACHE: Dict[str, str] = {}
 
 
 def upgrade_code(code: str, min_version: VersionTuple, no_cache: bool = False) -> str:
@@ -51,7 +53,7 @@ def upgrade_code(code: str, min_version: VersionTuple, no_cache: bool = False) -
 
 
 def version_code(
-    code: str, version_requirements: list[VersionTuple], no_cache: bool = False
+    code: str, version_requirements: List[VersionTuple], no_cache: bool = False
 ) -> VersionedCode:
     latest_code = code
     versioned_code: VersionedCode = {version_requirements[0]: code}

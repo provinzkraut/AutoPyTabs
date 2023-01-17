@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Tuple
 
 import pytest
 
@@ -65,8 +67,8 @@ def test_upgrade_single_version(
     [((3, i), (3, j)) for i in range(8, 12) for j in range(7, 12) if i <= j],
 )
 def test_upgrade_versions(
-    min_version: tuple[int, int],
-    max_version: tuple[int, int],
+    min_version: Tuple[int, int],
+    max_version: Tuple[int, int],
     sphinx_builder: SphinxBuilderFixture,
     file_regression: FileRegressionFixture,
     compat: bool,
