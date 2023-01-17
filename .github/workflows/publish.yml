@@ -1,23 +1,23 @@
 name: Publish
 on:
-  workflow_run:
+  workflow_call:
   release:
     types: [published]
-
 jobs:
-  name: build & publish
-  steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-        installer-parallel: true
-    - name: Publish
-      run: |
-        poetry config pypi-token.testpypi ${{ secrets.TEST_PYPI_API_TOKEN }}
-        poetry publish --build
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Set up python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+      - name: Install dependencies
+        run: poetry install
+      - name: build & publish
+        run: |
+          poetry config pypi-token.testpypi ${{ secrets.TEST_PYPI_API_TOKEN }}
+          poetry publish
