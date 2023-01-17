@@ -19,6 +19,5 @@ jobs:
         run: poetry install --no-root --no-dev
       - name: build & publish
         run: |
-          poetry config repositories.testpypi https://test.pypi.org/legacy/
-          poetry config pypi-token.testpypi ${{ secrets.TEST_PYPI_API_TOKEN }}
-          poetry publish --build --repository testpypi
+          poetry config pypi-token.testpypi ${{ secrets.PYPI_TOKEN }}
+          poetry publish --build
