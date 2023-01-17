@@ -73,11 +73,18 @@ class SphinxBuilder:
 
 @pytest.fixture()
 def sphinx_builder(tmp_path: Path, make_app, monkeypatch):
-    def _create_project(**conf_kwargs: dict[str, Any]):
+    def _create_project(
+        source: str,
+        compat: bool = False,
+        **conf_kwargs: dict[str, Any],
+    ):
         src_path = tmp_path / "srcdir"
         src_path.mkdir()
         conf_kwargs = {
-            "extensions": ["sphinx_design", "auto_pytabs.sphinx_ext"],
+            "extensions": [
+                "sphinx_design",
+                "auto_pytabs.sphinx_ext_compat" if compat else "auto_pytabs.sphinx_ext",
+            ],
             "auto_pytabs_no_cache": True,
             **(conf_kwargs or {}),
         }
@@ -91,6 +98,7 @@ def sphinx_builder(tmp_path: Path, make_app, monkeypatch):
         (src_path / "example.py").write_text(
             Path("test/sphinx_ext_test_data/example.py").read_text()
         )
+        src_path.joinpath("index.rst").write_text(source)
         return SphinxBuilder(app, src_path)
 
     yield _create_project

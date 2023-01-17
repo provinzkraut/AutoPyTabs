@@ -23,12 +23,15 @@ def indent(string: str, indent_char: str = " ", level: int = 4) -> list[str]:
 
 
 class UpgradeMixin(SphinxDirective):
+    compat: bool = False
+
     def _render_directive_options(self) -> str:
         ret = ""
-        options: dict[str, Any] = {"no-upgrade": True}
-        options.update(
-            {k: v for k, v in self.options.items() if k in CodeBlock.option_spec}
-        )
+        options: dict[str, Any] = {
+            k: v for k, v in self.options.items() if k in CodeBlock.option_spec
+        }
+        if not self.compat:
+            options["no-upgrade"] = True
         for option, value in options.items():
             if self.option_spec[option] is directives.flag:
                 value = None
@@ -91,24 +94,45 @@ class UpgradeMixin(SphinxDirective):
         return cast(list[Node], nodes)
 
 
-class UpgradeCodeBlock(CodeBlock, UpgradeMixin):
-    option_spec = {**CodeBlock.option_spec, "no-upgrade": directives.flag}
+class PyTabsCodeBlock(CodeBlock, UpgradeMixin):
+    compat = True
 
     def run(self) -> list[Node]:
-        if "no-upgrade" in self.options or self.arguments[0] != "python":
+        if self.arguments[0] != "python":
             return super().run()
 
         return self._create_py_tab_nodes("\n".join(self.content))
 
 
-class UpgradeLiteralInclude(LiteralInclude, UpgradeMixin):
-    option_spec = {**LiteralInclude.option_spec, "no-upgrade": directives.flag}
+class PyTabsLiteralInclude(LiteralInclude, UpgradeMixin):
+    compat = True
 
     def run(self) -> list[Node]:
         base_node = super().run()[0]
-        if "no-upgrade" in self.options or self.options.get("language") != "python":
+        if self.options.get("language") != "python":
             return [base_node]
         return self._create_py_tab_nodes(base_node.rawsource)  # type: ignore[attr-defined]   # noqa: E501
+
+
+class CodeBlockOverride(PyTabsCodeBlock):
+    compat = False
+    option_spec = {**CodeBlock.option_spec, "no-upgrade": directives.flag}
+
+    def run(self) -> list[Node]:
+        if "no-upgrade" in self.options:
+            return CodeBlock.run(self)
+
+        return super().run()
+
+
+class LiteralIncludeOverride(PyTabsLiteralInclude):
+    compat = False
+    option_spec = {**LiteralInclude.option_spec, "no-upgrade": directives.flag}
+
+    def run(self) -> list[Node]:
+        if "no-upgrade" in self.options:
+            return LiteralInclude.run(self)
+        return super().run()
 
 
 def on_config_inited(app: Sphinx, config: Config) -> None:
@@ -117,9 +141,9 @@ def on_config_inited(app: Sphinx, config: Config) -> None:
     )
 
 
-def setup(app: Sphinx) -> dict[str, bool | str]:
-    app.add_directive("code-block", UpgradeCodeBlock, override=True)
-    app.add_directive("literalinclude", UpgradeLiteralInclude, override=True)
+def base_setup(app: Sphinx) -> dict[str, bool | str]:
+    app.add_directive("pytabs-code-block", PyTabsCodeBlock)
+    app.add_directive("pytabs-literalinclude", PyTabsLiteralInclude)
 
     app.add_config_value(
         "auto_pytabs_tab_title_template",
@@ -137,3 +161,10 @@ def setup(app: Sphinx) -> dict[str, bool | str]:
         "parallel_read_safe": True,
         "parallel_write_safe": True,
     }
+
+
+def setup(app: Sphinx) -> dict[str, bool | str]:
+    app.add_directive("code-block", CodeBlockOverride, override=True)
+    app.add_directive("literalinclude", LiteralIncludeOverride, override=True)
+
+    return base_setup(app)
