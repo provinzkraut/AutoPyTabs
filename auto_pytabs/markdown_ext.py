@@ -190,7 +190,7 @@ class AutoPyTabsExtension(Extension):
                 max_version=config["max_version"],
                 tab_title_template=config["tab_title_template"],
             ),
-            "auto-pytabs",
+            "auto_pytabs",
             32,
         )
 
