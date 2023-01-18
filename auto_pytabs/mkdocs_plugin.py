@@ -3,7 +3,7 @@ from __future__ import annotations
 import secrets
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, List
+from typing import Dict, List, NamedTuple, TYPE_CHECKING
 
 import markdown
 from mkdocs.config import Config, config_options
@@ -11,16 +11,41 @@ from mkdocs.config.defaults import MkDocsConfig
 from mkdocs.plugins import BasePlugin
 from mkdocs.structure.files import File, Files
 
-from auto_pytabs.markdown_ext import (
-    PendingTransformation,
-    convert_block,
-    extract_code_blocks,
-)
+from auto_pytabs.markdown_ext import convert_block, extract_code_blocks
 from auto_pytabs.types import VersionTuple
 from auto_pytabs.util import get_version_requirements, parse_version_tuple
 
 if TYPE_CHECKING:
     from pymdownx.snippets import SnippetPreprocessor  # type: ignore
+
+
+class PendingTransformation(NamedTuple):
+    tmp_docs_file: Path
+    new_lines: List[str]
+    to_upgrade: Dict[int, List[str]]
+
+
+def extract_blocks_from_file(
+    docs_file: File,
+    tmp_path: Path,
+    snippets_preprocessor: SnippetPreprocessor | None = None,
+) -> PendingTransformation | None:
+    content = Path(docs_file.abs_src_path).read_text().splitlines()
+    if snippets_preprocessor:
+        content = snippets_preprocessor.run(content)
+
+    new_lines, to_upgrade = extract_code_blocks(content)
+    if not to_upgrade:
+        return None
+
+    tmp_docs_file = tmp_path / secrets.token_hex()
+    docs_file.abs_src_path = str(tmp_docs_file)
+
+    return PendingTransformation(
+        tmp_docs_file=tmp_docs_file,
+        new_lines=new_lines,
+        to_upgrade=to_upgrade,
+    )
 
 
 class PluginConfig(Config):  # type: ignore[no-untyped-call]
@@ -86,7 +111,6 @@ class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-cal
                 self.snippets_processor,
             ):
                 self._transform_pending(pending)
-
         return files
 
     def _cleanup_temp_files(self) -> None:
@@ -99,26 +123,3 @@ class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-cal
 
     def on_build_error(self, error: Exception) -> None:
         self._cleanup_temp_files()
-
-
-def extract_blocks_from_file(
-    docs_file: File,
-    tmp_path: Path,
-    snippets_preprocessor: SnippetPreprocessor | None = None,
-) -> PendingTransformation | None:
-    content = Path(docs_file.abs_src_path).read_text().splitlines()
-    if snippets_preprocessor:
-        content = snippets_preprocessor.run(content)
-
-    new_lines, to_upgrade = extract_code_blocks(content)
-    if not to_upgrade:
-        return None
-
-    tmp_docs_file = tmp_path / secrets.token_hex()
-    docs_file.abs_src_path = str(tmp_docs_file)
-
-    return PendingTransformation(
-        tmp_docs_file=tmp_docs_file,
-        new_lines=new_lines,
-        to_upgrade=to_upgrade,
-    )

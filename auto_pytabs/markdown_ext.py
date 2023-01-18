@@ -1,29 +1,21 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
-from typing import Any, Literal, NamedTuple, cast, Set, List, Dict, Tuple
+from typing import Any, Dict, List, Literal, Set, Tuple, cast
 
 import markdown
 from markdown import Extension
 from markdown.preprocessors import Preprocessor
 
 from auto_pytabs.core import version_code
-from auto_pytabs.util import parse_version_requirements
 from auto_pytabs.types import VersionTuple, VersionedCode
-
+from auto_pytabs.util import parse_version_requirements
 
 RGX_BLOCK_TOKENS = re.compile(r"(.*```py[\w\W]*)|(.*```)")
 RGX_PYTABS_DIRECTIVE = re.compile(r"<!-- ?autopytabs: ?(.*)-->")
 
 PyTabDirective = Literal["disable", "enable", "disable-block"]
 PYTAB_DIRECTIVES: Set[PyTabDirective] = {"disable", "enable", "disable-block"}
-
-
-class PendingTransformation(NamedTuple):
-    tmp_docs_file: Path
-    new_lines: List[str]
-    to_upgrade: Dict[int, List[str]]
 
 
 def _strip_indentation(lines: List[str]) -> Tuple[List[str], str]:
