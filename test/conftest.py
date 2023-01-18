@@ -5,9 +5,7 @@ https://github.com/executablebooks/sphinx-design/blob/6df47513e9e221c61877e9308d
 
 from __future__ import annotations
 
-
 import os
-import shutil
 from pathlib import Path
 from typing import Any
 
@@ -16,7 +14,7 @@ from docutils import nodes
 from sphinx.testing.path import path as sphinx_path
 from sphinx.testing.util import SphinxTestApp
 
-from auto_pytabs.core import CACHE_DIR
+from auto_pytabs.core import CACHE
 
 pytest_plugins = "sphinx.testing.fixtures"
 
@@ -24,9 +22,9 @@ pytest_plugins = "sphinx.testing.fixtures"
 @pytest.fixture(autouse=True, scope="session")
 def purge_cache():
 
-    shutil.rmtree(CACHE_DIR, ignore_errors=True)
+    CACHE.clear()
     yield
-    shutil.rmtree(CACHE_DIR, ignore_errors=True)
+    CACHE.clear()
 
 
 class SphinxBuilder:
