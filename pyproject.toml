@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "auto-pytabs"
-version = "0.1.0"
+version = "0.1.1"
 description = "Automatically generate tabbed code blocks for multiple Python versions in mkdocs, markdown and Sphinx"
 authors = ["Janek Nouvertné <provinzkraut@posteo.de>"]
 readme = "README.md"
