@@ -35,7 +35,7 @@ def _strip_indentation(lines: List[str]) -> Tuple[List[str], str]:
         indent_char = first_line[0]
     indent = indent_char * (len(first_line) - len(first_line.lstrip(indent_char)))
     if indent:
-        return [line.split(indent, 1)[1] for line in lines], indent
+        return [line.split(indent, 1)[1] if line else "" for line in lines], indent
     return lines, indent
 
 
