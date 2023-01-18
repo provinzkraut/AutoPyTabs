@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import concurrent.futures
 import secrets
 import shutil
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import TYPE_CHECKING, List
 
@@ -62,19 +60,13 @@ class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-cal
     def _transform_pending(
         self,
         transformation: PendingTransformation,
-        executor: concurrent.futures.ProcessPoolExecutor,
     ) -> None:
         new_lines = transformation.new_lines
         to_transform = transformation.to_upgrade
 
         to_replace = {}
-        fs = {
-            executor.submit(self._convert_block, block): index
-            for index, block in to_transform.items()
-        }
-        for future in as_completed(fs):
-            index = fs[future]
-            to_replace[index] = future.result()
+        for index, block in to_transform.items():
+            to_replace[index] = self._convert_block(block)
 
         output = ""
         for i, line in enumerate(new_lines):
@@ -85,8 +77,6 @@ class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-cal
     def on_files(self, files: Files, *, config: MkDocsConfig) -> Files:
         self.config.tmp_path.mkdir(exist_ok=True)
 
-        pending_transformations = []
-
         for file in files:
             if not file.is_documentation_page():
                 continue
@@ -95,18 +85,7 @@ class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-cal
                 self.config.tmp_path,
                 self.snippets_processor,
             ):
-                pending_transformations.append(pending)
-
-        with ThreadPoolExecutor() as thread_pool, ProcessPoolExecutor() as process_pool:
-            fs = [
-                thread_pool.submit(
-                    self._transform_pending,
-                    transformation=transformation,
-                    executor=process_pool,
-                )
-                for transformation in pending_transformations
-            ]
-            concurrent.futures.wait(fs, return_when=concurrent.futures.ALL_COMPLETED)
+                self._transform_pending(pending)
 
         return files
 
