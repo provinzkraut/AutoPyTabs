@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Iterable, TYPE_CHECKING, cast, List, Dict
 
-from docutils.nodes import Node, section
+from docutils.nodes import Node, section, container
 from docutils.parsers.rst import directives
 from docutils.statemachine import ViewList
 from sphinx.config import Config
@@ -111,7 +111,9 @@ class PyTabsLiteralInclude(LiteralInclude, UpgradeMixin):
         base_node = super().run()[0]
         if self.options.get("language") != "python":
             return [base_node]
-        return self._create_py_tab_nodes(base_node.rawsource)  # type: ignore[attr-defined]   # noqa: E501
+        if isinstance(base_node, container):
+            base_node = base_node.children[1]
+        return self._create_py_tab_nodes(base_node.rawsource)  # type: ignore[attr-defined]  # noqa: E501
 
 
 class CodeBlockOverride(PyTabsCodeBlock):

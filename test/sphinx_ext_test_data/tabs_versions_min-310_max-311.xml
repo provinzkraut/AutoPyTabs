@@ -5,12 +5,18 @@
         <section ids="code-block" names="code-block">
             <title>
                 code-block
-            <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
-                def foo(x: dict[str, str] | list[str]) -> list[int] | None:
-                    pass
+            <container classes="literal-block-wrapper" ids="id1" literal_block="True">
+                <caption>
+                    test caption
+                <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
+                    def foo(x: dict[str, str] | list[str]) -> list[int] | None:
+                        pass
         <section ids="literalinclude" names="literalinclude">
             <title>
                 literalinclude
-            <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
-                def foo(x: dict[str, str] | list[str]) -> list[int] | None:
-                    pass
+            <container classes="literal-block-wrapper" ids="id2" literal_block="True">
+                <caption>
+                    test caption
+                <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
+                    def foo(x: dict[str, str] | list[str]) -> list[int] | None:
+                        pass

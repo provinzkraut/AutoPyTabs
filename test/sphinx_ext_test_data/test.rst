@@ -6,6 +6,7 @@ code-block
 ----------
 
 .. code-block:: python
+    :caption: test caption
 
     from typing import Dict, Union, List, Optional
 
@@ -18,3 +19,4 @@ literalinclude
 
 .. literalinclude:: example.py
     :language: python
+    :caption: test caption
