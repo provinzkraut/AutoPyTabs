@@ -68,7 +68,7 @@ md = markdown.Markdown(
 )
 ```
 
-#### Mkdocs plugins vs markdown extension
+### Mkdocs plugins vs markdown extension
 
 AutoPyTabs ships as both a markdown extension and an mkdocs plugin, both of which can be used in mkdocs. The only difference
 between them is that the mkdocs plugin performs automatic cache-eviction of unused files. This is not easily possible with
