@@ -98,9 +98,10 @@ class PyTabsCodeBlock(CodeBlock, UpgradeMixin):
     compat = True
 
     def run(self) -> list[Node]:
-        if self.arguments[0] != "python":
+        if not self.arguments or self.arguments[0] != "python":
             return super().run()
 
+        self.assert_content()
         return self._create_py_tab_nodes("\n".join(self.content))
 
 
