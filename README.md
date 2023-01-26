@@ -15,7 +15,7 @@ there's only *one* file to maintain, and to be checked into VCS.
 
 ## Table of contents
 
-1. [Usage with markdown](#usage-with-markdown)
+1. [Usage with mkdocs / markdown](#usage-markdown)
    1. [Configuration](#markdown-config)
    2. [Examples](#markdown-examples)
    3. [Selectively disable](#selectively-disable)
@@ -28,19 +28,21 @@ there's only *one* file to maintain, and to be checked into VCS.
 
 ## Installation
 
+For mkdocs: `pip install auto-pytabs[mkdocs]`
 For markdown: `pip install auto-pytabs[markdown]`
 For sphinx: `pip install auto-pytabs[sphinx]`
 
-## Usage with markdown
+<h2 id="usage-markdown">Usage with mkdocs / markdown</h2>
 
 <h3 id="markdown-config">Configuration</h3>
 
-**Markdown extension in mkdocs**
+**Mkdocs plugin**
 
 ```yaml
 site_name: My Docs
 markdown_extensions:
   - pymdownx.tabbed:
+plugins:
   - auto_pytabs:
       min_version: "3.7"  # optional
       max_version: "3.11" # optional
@@ -65,6 +67,15 @@ md = markdown.Markdown(
     },
 )
 ```
+
+#### Mkdocs plugins vs markdown extension
+
+AutoPyTabs ships as both a markdown extension and an mkdocs plugin, both of which can be used in mkdocs. The only difference
+between them is that the mkdocs plugin performs automatic cache-eviction of unused files. This is not easily possible with
+a markdown extension since it does not have a clearly defined build phase with which an extension could interact, meaning an
+extension does not know when the build is "done", and therefore also not if a cache file is truly unused.
+
+If you are using mkdocs, the mkdocs plugin is recommended. If you have caching disabled, there will be no difference either way.
 
 <h3 id="markdown-examples">Examples</h3>
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from hashlib import md5
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Optional
+from typing import Any, Dict, List, NamedTuple, Optional, Set
 
 import autoflake  # type: ignore
 from pyupgrade._data import Settings as PyUpgradeSettings  # type: ignore
@@ -26,6 +26,7 @@ VersionedCode = Dict[VersionTuple, str]
 class Cache:
     _initialised = False
     _cache: Dict[str, str] = {}
+    _touched: Set[str] = set()
     cache_dir = Path(".auto_pytabs_cache")
 
     @classmethod
@@ -53,19 +54,38 @@ class Cache:
     @classmethod
     def get(cls, key: str) -> Optional[str]:
         cls._initialise()
+        cls._touched.add(key)
         return cls._cache.get(key)
 
     @classmethod
     def set(cls, key: str, content: str) -> None:
         cls._initialise()
         cls._cache[key] = content
+        cls._touched.add(key)
         cls.cache_dir.joinpath(key).write_text(content)
 
     @classmethod
-    def clear(cls) -> None:
-        cls._initialise()
+    def clear_all(cls) -> None:
+        cls._cache = {}
+        cls._touched = set()
+        cls._initialised = False
+
+        if not cls.cache_dir.exists():
+            return
+
         for file in cls.cache_dir.iterdir():
             file.unlink()
+
+    @classmethod
+    def evict_unused(cls) -> None:
+        if not cls.cache_dir.exists():
+            return
+
+        with ThreadPoolExecutor() as executor:
+            for key in cls._cache.keys() - cls._touched:
+                executor.submit(cls.cache_dir.joinpath(key).unlink, missing_ok=True)
+                if key in cls._cache:
+                    del cls._cache[key]
 
 
 def get_version_requirements(

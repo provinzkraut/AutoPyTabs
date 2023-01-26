@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, Iterable, TYPE_CHECKING, cast, List, Dict
+from typing import Any, Dict, Iterable, List, TYPE_CHECKING, cast
 
-from docutils.nodes import Node, section, container
+from docutils.nodes import Node, container, section
 from docutils.parsers.rst import directives
 from docutils.statemachine import ViewList
 from sphinx.config import Config
@@ -10,7 +10,12 @@ from sphinx.directives.code import CodeBlock, LiteralInclude
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.nodes import nested_parse_with_titles
 
-from auto_pytabs.core import VersionedCode, get_version_requirements, version_code
+from auto_pytabs.core import (
+    Cache,
+    VersionedCode,
+    get_version_requirements,
+    version_code,
+)
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -142,6 +147,10 @@ def on_config_inited(app: Sphinx, config: Config) -> None:
     )
 
 
+def on_build_finished(app: Sphinx, exception: Exception | None) -> None:
+    Cache.evict_unused()
+
+
 def base_setup(app: Sphinx) -> Dict[str, bool | str]:
     app.add_directive("pytabs-code-block", PyTabsCodeBlock)
     app.add_directive("pytabs-literalinclude", PyTabsLiteralInclude)
@@ -156,6 +165,8 @@ def base_setup(app: Sphinx) -> Dict[str, bool | str]:
     app.add_config_value("auto_pytabs_no_cache", default=False, rebuild="html")
 
     app.connect("config-inited", on_config_inited)
+
+    app.connect("build-finished", on_build_finished)
 
     return {
         "version": "0.1",

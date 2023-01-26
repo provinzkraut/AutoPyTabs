@@ -12,6 +12,7 @@ pyupgrade = "^3.3.1"
 autoflake = "^2.0.0"
 sphinx = { version = ">=4,<6", optional = true }
 markdown = {version = ">=3.2.1,<3.4", optional = true }
+mkdocs = {version = "^1.4.2", optional = true}
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
@@ -22,15 +23,20 @@ pymdown-extensions = "^9.9"
 sphinx-design = "^0.3.0"
 pytest-regressions = "^2.4.2"
 types-docutils = "^0.19.1.1"
+mkdocs = "^1.4.2"
 
 
 [tool.poetry.extras]
 sphinx = ["sphinx"]
 markdown = ["markdown"]
+mkdocs = ["mkdocs"]
 
 
 [tool.poetry.plugins."markdown.extensions"]
 auto_pytabs = "auto_pytabs.markdown_ext:AutoPyTabsExtension"
+
+[tool.poetry.plugins."mkdocs.plugins"]
+auto_pytabs = "auto_pytabs.mkdocs_plugin:AutoPyTabsPlugin"
 
 
 [build-system]

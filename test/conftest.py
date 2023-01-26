@@ -22,9 +22,9 @@ pytest_plugins = "sphinx.testing.fixtures"
 
 @pytest.fixture(autouse=True, scope="session")
 def purge_cache():
-    Cache.clear()
+    Cache.clear_all()
     yield
-    Cache.clear()
+    Cache.clear_all()
 
 
 class SphinxBuilder:
