@@ -168,7 +168,7 @@ class AutoPyTabsExtension(Extension):
             "min_version": ["3.7", "minimum version"],
             "max_version": ["3.11", "maximum version"],
             "tab_title_template": ["", "tab title format-string"],
-            "no_cache": [False, "disable caching"],
+            "no_cache": [True, "disable caching"],
         }
         super().__init__(*args, **kwargs)
 
@@ -183,6 +183,7 @@ class AutoPyTabsExtension(Extension):
                 min_version=config["min_version"],
                 max_version=config["max_version"],
                 tab_title_template=config["tab_title_template"],
+                no_cache=config["no_cache"],
             ),
             "auto_pytabs",
             32,

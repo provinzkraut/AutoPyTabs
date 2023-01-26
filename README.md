@@ -12,8 +12,7 @@ This library is work in progress. Approach with caution
 
 ## Table of contents
 
-1. [Mkdocs / markdown](#mkdocs-markdown)
-   1. [Plugin or extension?](#plugin-or-extension)
+1. [markdown / mkdocs](#mkdocs-markdown)
    1. [Configuration](#mkdocs-config)
    1. [Examples](#mkdocs-examples)
    1. [Selectively disable](#selectively-disable)
@@ -30,42 +29,9 @@ This library is work in progress. Approach with caution
 
 ### Installation
 
-`pip install auto-pytabs[mkdocs]` or `pip install auto-pytabs[markdown]` if only using
-the markdown extension.
-
-### Plugin or extension?
-
-When using mkdocs, you have the choice to either use AutoPyTabs as a plugin, or a markdown extension.
-The result is the same, with the main difference being how they integrate into the rendering workflow.
-Behind the scenes, AutoPyTabs makes use of [pyupgrade](https://github.com/asottile/pyupgrade) and
-[autoflake](https://github.com/PyCQA/autoflake) to generate the upgraded code, which is a relatively costly process.
-While AutoPyTabs tries to cache as much as possible, due to the limitations of mkdocs, it can still result in a considerable
-amount of additional build time.
-
-The main issues are that the core process of mkdocs is inherently linear and only supports limited incremental builds. To
-somewhat alleviate these issues, the mkdocs plugin provided by AutPyTabs employs parallelized source-file level transformations:
-
-- After mkdocs has collected all source files, collect the ones that contain code blocks which need upgrading
-- Create temporary files for all collected files and tell mkdocs to use those instead
-- Transform the temporary files, using multiple worker processes
+`pip install auto-pytabs[markdown]`
 
 <h3 id="mkdocs-config">Configuration</h3>
-
-**Mkdocs plugin**
-
-```yaml
-site_name: My Docs
-markdown_extensions:
-  - pymdownx.tabbed:
-plugins:
-  - auto_pytabs:
-      min_version: "3.7"  # optional
-      max_version: "3.11" # optional
-      tab_title_template: "Python {min_version}+"  # optional
-      no_cache: false  # optional
-```
-
-Or using the markdown extension directly:
 
 **Markdown extension in mkdocs**
 
