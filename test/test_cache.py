@@ -15,6 +15,7 @@ def test_get_not_found() -> None:
 
 
 def test_get() -> None:
+    Cache.cache_dir.mkdir(exist_ok=True)
     Cache.cache_dir.joinpath("foo").write_text("bar")
 
     assert Cache.get("foo") == "bar"
@@ -31,6 +32,7 @@ def test_set() -> None:
 
 
 def test_clean() -> None:
+    Cache.cache_dir.mkdir(exist_ok=True)
     test_file_one = Cache.cache_dir.joinpath("one")
     test_file_two = Cache.cache_dir.joinpath("two")
     test_file_one.write_text("foo")

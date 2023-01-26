@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from hashlib import md5
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple, Optional, Set
+import shutil
 
 import autoflake  # type: ignore
 from pyupgrade._data import Settings as PyUpgradeSettings  # type: ignore
@@ -73,8 +74,7 @@ class Cache:
         if not cls.cache_dir.exists():
             return
 
-        for file in cls.cache_dir.iterdir():
-            file.unlink()
+        shutil.rmtree(cls.cache_dir)
 
     @classmethod
     def evict_unused(cls) -> None:
