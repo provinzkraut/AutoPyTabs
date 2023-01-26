@@ -19,6 +19,7 @@ repos:
       hooks:
       - id: mdformat
         exclude: "_test_data"
+        args: ["--number"]
         additional_dependencies:
           - mdformat-gfm
     - repo: https://github.com/pre-commit/mirrors-mypy

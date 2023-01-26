@@ -6,32 +6,34 @@ Tooling to automatically generate tabbed code examples for different Python vers
 [pymdown "tabbed"](https://facelessuser.github.io/pymdown-extensions/extensions/tabbed/) markdown extension for markdown,
 and [sphinx{design} tabs](https://sphinx-design.readthedocs.io/en/latest/tabs.html) for Sphinx.
 
-# Work in progress
+## Motivation
 
-This library is work in progress. Approach with caution
+Writing and maintaining documentation can be tedious, especially the task of including
+code snippets for different versions of Python. AutoPyTabs aims to solve this problem
+by automatically generating those "versioned snippets" at build-time, which means
+there's only *one* file to maintain, and to be checked into VCS.
 
 ## Table of contents
 
-1. [markdown / mkdocs](#mkdocs-markdown)
-   1. [Configuration](#mkdocs-config)
-   1. [Examples](#mkdocs-examples)
-   1. [Selectively disable](#selectively-disable)
-   1. [Compatibility with `pymdownx.snippets`](#compatibility-with-pymdownxsnippets)
-1. [Sphinx](#sphinx)
+1. [Usage with markdown](#usage-with-markdown)
+   1. [Configuration](#markdown-config)
+   2. [Examples](#markdown-examples)
+   3. [Selectively disable](#selectively-disable)
+   4. [Compatibility with `pymdownx.snippets`](#compatibility-with-pymdownxsnippets)
+2. [Usage with Sphinx](#usage-with-sphinx)
    1. [Configuration](#sphinx-config)
-   1. [Directives](#directives)
-   1. [Examples](#sphinx-examples)
-   1. [Compatibility with other extensions](#compatibility-with-other-extensions)
+   2. [Directives](#directives)
+   3. [Examples](#sphinx-examples)
+   4. [Compatibility with other extensions](#compatibility-with-other-extensions)
 
-# Usage
+## Installation
 
-<h2 id="mkdocs-markdown">Mkdocs / markdown</h2>
+For markdown: `pip install auto-pytabs[markdown]`
+For sphinx: `pip install auto-pytabs[sphinx]`
 
-### Installation
+## Usage with markdown
 
-`pip install auto-pytabs[markdown]`
-
-<h3 id="mkdocs-config">Configuration</h3>
+<h3 id="markdown-config">Configuration</h3>
 
 **Markdown extension in mkdocs**
 
@@ -52,7 +54,7 @@ markdown_extensions:
 import markdown
 
 md = markdown.Markdown(
-    extensions=["auto_pytabs.markdown_ext"],
+    extensions=["auto_pytabs"],
     extension_configs={
         "auto_pytabs": {
             "min_version": "3.7",  # optional
@@ -62,10 +64,9 @@ md = markdown.Markdown(
         }
     },
 )
-
 ```
 
-<h3 id="mkdocs-examples">Examples</h3>
+<h3 id="markdown-examples">Examples</h3>
 
 **Input**
 
@@ -184,18 +185,12 @@ re-enables conversion again
 
 If the `pymdownx.snippets` extension is used, make sure that it runs **before** AutoPyTab
 
-## Sphinx
+## Usage with Sphinx
 
 AutPyTabs provides a Sphinx extension `auto_pytabs.sphinx_ext`, enabling its functionality
 for the `.. code-block` and `.. literalinclude` directives.
 
-### Installation
-
-`pip install auto-pytabs[sphinx]`
-
-### Usage
-
-<h4 id="sphinx-config">Configuration</h4>
+<h3 id="sphinx-config">Configuration</h3>
 
 ```python
 extensions = ["auto_pytabs.sphinx_ext", "sphinx_design"]
