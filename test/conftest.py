@@ -13,6 +13,7 @@ import pytest
 from docutils import nodes
 from sphinx.testing.path import path as sphinx_path
 from sphinx.testing.util import SphinxTestApp
+import shutil
 
 from auto_pytabs.core import CACHE
 
@@ -96,9 +97,13 @@ def sphinx_builder(tmp_path: Path, make_app, monkeypatch):
         app = make_app(
             srcdir=sphinx_path(os.path.abspath(str(src_path))), buildername="html"
         )
-        (src_path / "example.py").write_text(
-            Path("test/sphinx_ext_test_data/example.py").read_text()
+        shutil.copy(
+            "test/sphinx_ext_test_data/example.py", src_path.joinpath("example.py")
         )
+        shutil.copy(
+            "test/sphinx_ext_test_data/example.js", src_path.joinpath("example.js")
+        )
+
         src_path.joinpath("index.rst").write_text(source)
         return SphinxBuilder(app, src_path)
 

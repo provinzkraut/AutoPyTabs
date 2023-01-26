@@ -101,7 +101,7 @@ class PyTabsCodeBlock(CodeBlock, UpgradeMixin):
         if not self.arguments or self.arguments[0] != "python":
             return super().run()
 
-        self.assert_content()
+        self.assert_has_content()
         return self._create_py_tab_nodes("\n".join(self.content))
 
 

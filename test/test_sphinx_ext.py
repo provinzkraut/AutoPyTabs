@@ -92,7 +92,4 @@ def test_upgrade_versions(
         f"max-{max_version[0]}{max_version[1]}.xml"
     )
 
-    file_regression.check(
-        pformat,
-        fullpath=comp_data_file,
-    )
+    file_regression.check(pformat, fullpath=comp_data_file)

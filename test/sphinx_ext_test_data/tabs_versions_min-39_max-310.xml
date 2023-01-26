@@ -28,6 +28,16 @@
                             <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
                                 def foo(x: dict[str, str] | list[str]) -> list[int] | None:
                                     pass
+        <section ids="code-block-non-python" names="code-block\ non-python">
+            <title>
+                code-block non-python
+            <literal_block force="False" highlight_args="{}" language="javascript" xml:space="preserve">
+                const x = "hello"
+        <section ids="code-block-no-language" names="code-block\ no\ language">
+            <title>
+                code-block no language
+            <literal_block force="False" highlight_args="{}" language="default" xml:space="preserve">
+                this is something
         <section ids="literalinclude" names="literalinclude">
             <title>
                 literalinclude
@@ -55,3 +65,13 @@
                             <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
                                 def foo(x: dict[str, str] | list[str]) -> list[int] | None:
                                     pass
+        <section ids="literalinclude-non-python" names="literalinclude\ non-python">
+            <title>
+                literalinclude non-python
+            <literal_block force="False" highlight_args="{'linenostart': 1}" language="javascript" source="example.js" xml:space="preserve">
+                const foo = "bar"
+        <section ids="literalinclude-no-language" names="literalinclude\ no\ language">
+            <title>
+                literalinclude no language
+            <literal_block force="False" highlight_args="{'linenostart': 1}" source="example.js" xml:space="preserve">
+                const foo = "bar"
