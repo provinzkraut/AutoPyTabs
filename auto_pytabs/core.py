@@ -3,61 +3,81 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from hashlib import md5
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, NamedTuple, Optional
 
 import autoflake  # type: ignore
 from pyupgrade._data import Settings as PyUpgradeSettings  # type: ignore
 from pyupgrade._main import _fix_plugins  # type: ignore
 
-from auto_pytabs.types import VersionTuple, VersionedCode
+
+class VersionTuple(NamedTuple):
+    major: int
+    minor: int
+
+    @classmethod
+    def from_string(cls, version: str) -> VersionTuple:
+        major, minor = version.split(".")
+        return VersionTuple(major=int(major), minor=int(minor))
+
+
+VersionedCode = Dict[VersionTuple, str]
 
 
 class Cache:
-    instance: Optional[Cache] = None
+    _initialised = False
+    _cache: Dict[str, str] = {}
+    cache_dir = Path(".auto_pytabs_cache")
 
-    def __new__(cls) -> Cache:
-        if cls.instance is None:
-            cls.instance = super().__new__(cls)
-        return cls.instance
-
-    def __init__(self) -> None:
-        self.cache_dir = Path(".auto_pytabs_cache")
-        self.cache_dir.mkdir(exist_ok=True)
-        self._cache: Dict[str, str] = {}
-        self._initialised = False
-        self._load_cache()
-
-    def _load_cache(self) -> None:
-        if self._initialised:
+    @classmethod
+    def _initialise(cls) -> None:
+        if cls._initialised:
             return
+
+        cls.cache_dir.mkdir(exist_ok=True)
+
         cache: Dict[str, str] = {}
         with ThreadPoolExecutor() as executor:
             futures = {
                 executor.submit(file.read_text): file.name
-                for file in self.cache_dir.iterdir()
+                for file in cls.cache_dir.iterdir()
             }
             for future in as_completed(futures):
                 cache[futures[future]] = future.result()
-        self._cache.update(cache)
-        self._initialised = True
+        cls._cache.update(cache)
+        cls._initialised = True
 
     @staticmethod
     def make_cache_key(*parts: Any) -> str:
         return md5("".join(map(str, parts)).encode()).hexdigest()
 
-    def get(self, key: str) -> Optional[str]:
-        return self._cache.get(key)
+    @classmethod
+    def get(cls, key: str) -> Optional[str]:
+        cls._initialise()
+        return cls._cache.get(key)
 
-    def set(self, key: str, content: str) -> None:
-        self._cache[key] = content
-        self.cache_dir.joinpath(key).write_text(content)
+    @classmethod
+    def set(cls, key: str, content: str) -> None:
+        cls._initialise()
+        cls._cache[key] = content
+        cls.cache_dir.joinpath(key).write_text(content)
 
-    def clear(self) -> None:
-        for file in self.cache_dir.iterdir():
+    @classmethod
+    def clear(cls) -> None:
+        cls._initialise()
+        for file in cls.cache_dir.iterdir():
             file.unlink()
 
 
-CACHE = Cache()
+def get_version_requirements(
+    min_version: VersionTuple, max_version: VersionTuple
+) -> List[VersionTuple]:
+    min_major, min_minor = min_version
+    max_major, max_minor = max_version
+    return [
+        VersionTuple(major=major, minor=minor)
+        for major in range(min_major, max_major + 1)
+        for minor in range(min_minor, max_minor + 1)
+    ]
 
 
 def upgrade_code(code: str, min_version: VersionTuple, no_cache: bool = False) -> str:
@@ -65,7 +85,7 @@ def upgrade_code(code: str, min_version: VersionTuple, no_cache: bool = False) -
     if not no_cache:
         cache_key = Cache.make_cache_key(code, min_version)
 
-        if cached_code := CACHE.get(cache_key):
+        if cached_code := Cache.get(cache_key):
             return cached_code
 
     upgraded_code = _fix_plugins(
@@ -81,7 +101,7 @@ def upgrade_code(code: str, min_version: VersionTuple, no_cache: bool = False) -
         code = autoflake.fix_code(upgraded_code, remove_all_unused_imports=True)
 
     if cache_key:
-        CACHE.set(cache_key, code)
+        Cache.set(cache_key, code)
 
     return code
 

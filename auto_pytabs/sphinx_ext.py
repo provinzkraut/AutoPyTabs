@@ -10,12 +10,10 @@ from sphinx.directives.code import CodeBlock, LiteralInclude
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.nodes import nested_parse_with_titles
 
-from auto_pytabs.core import version_code
-from auto_pytabs.util import get_version_requirements
+from auto_pytabs.core import VersionedCode, get_version_requirements, version_code
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
-    from auto_pytabs.types import VersionedCode
 
 
 def indent(string: str, indent_char: str = " ", level: int = 4) -> List[str]:

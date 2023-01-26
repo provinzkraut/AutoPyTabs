@@ -7,9 +7,12 @@ import markdown
 from markdown import Extension
 from markdown.preprocessors import Preprocessor
 
-from auto_pytabs.core import version_code
-from auto_pytabs.types import VersionTuple, VersionedCode
-from auto_pytabs.util import parse_version_requirements
+from auto_pytabs.core import (
+    VersionTuple,
+    VersionedCode,
+    get_version_requirements,
+    version_code,
+)
 
 RGX_BLOCK_TOKENS = re.compile(r"(.*```py[\w\W]*)|(.*```)")
 RGX_PYTABS_DIRECTIVE = re.compile(r"<!-- ?autopytabs: ?(.*)-->")
@@ -135,7 +138,9 @@ class UpgradePreprocessor(Preprocessor):
         no_cache: bool = False,
         **kwargs: Any,
     ) -> None:
-        self.versions = parse_version_requirements(min_version, max_version)
+        self.min_version = VersionTuple.from_string(min_version)
+        self.max_version = VersionTuple.from_string(max_version)
+        self.versions = get_version_requirements(self.min_version, self.max_version)
         self.tab_title_template = tab_title_template or "Python {min_version}+"
         self.no_cache = no_cache
         super().__init__(*args, **kwargs)
