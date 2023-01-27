@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from mkdocs.config import Config, config_options
 from mkdocs.config.defaults import MkDocsConfig
 from mkdocs.plugins import BasePlugin
@@ -15,7 +17,13 @@ class PluginConfig(Config):  # type: ignore[no-untyped-call]
 
 
 class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-call]
+    def __init__(self) -> None:
+        self.cache: Optional[Cache] = None
+
     def on_config(self, config: MkDocsConfig) -> Config | None:
+        if not self.config.no_cache:
+            self.cache = Cache()
+
         config.markdown_extensions.append("auto_pytabs")
         config["mdx_configs"].update(
             {
@@ -23,14 +31,16 @@ class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-cal
                     "min_version": self.config.min_version,
                     "max_version": self.config.max_version,
                     "tab_title_template": self.config.tab_title_template,
-                    "no_cache": self.config.no_cache,
+                    "cache": self.cache,
                 }
             }
         )
         return None
 
     def on_post_build(self, config: MkDocsConfig) -> None:
-        Cache.evict_unused()
+        if self.cache:
+            self.cache.evict_unused()
 
     def on_build_error(self, error: Exception) -> None:
-        Cache.evict_unused()
+        if self.cache:
+            self.cache.evict_unused()

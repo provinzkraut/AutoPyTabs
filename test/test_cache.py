@@ -3,48 +3,51 @@ import pytest
 from auto_pytabs.core import Cache
 
 
-@pytest.fixture(autouse=True)
-def purge_cache():
-    Cache.clear_all()
-    yield
-    Cache.clear_all()
+@pytest.fixture()
+def cache() -> Cache:
+    cache = Cache()
+    cache.clear_all()
+    yield cache
+    cache.clear_all()
 
 
-def test_get_not_found() -> None:
-    assert Cache.get("foo") is None
+def test_get_not_found(cache) -> None:
+    assert cache.get("foo") is None
 
 
-def test_get() -> None:
-    Cache.cache_dir.mkdir(exist_ok=True)
-    Cache.cache_dir.joinpath("foo").write_text("bar")
+def test_get(cache) -> None:
+    cache.cache_dir.mkdir(exist_ok=True)
+    cache.cache_dir.joinpath("foo").write_text("bar")
+    cache._load()
 
-    assert Cache.get("foo") == "bar"
-    assert Cache._cache["foo"] == "bar"
-
-
-def test_set() -> None:
-    Cache.set("foo", "bar")
-
-    assert Cache.get("foo") == "bar"
-    assert Cache._cache["foo"] == "bar"
-    assert Cache.cache_dir.joinpath("foo").exists()
-    assert Cache.cache_dir.joinpath("foo").read_text() == "bar"
+    assert cache.get("foo") == "bar"
+    assert cache._cache["foo"] == "bar"
 
 
-def test_clean() -> None:
-    Cache.cache_dir.mkdir(exist_ok=True)
-    test_file_one = Cache.cache_dir.joinpath("one")
-    test_file_two = Cache.cache_dir.joinpath("two")
+def test_set(cache) -> None:
+    cache.set("foo", "bar")
+
+    assert cache.get("foo") == "bar"
+    assert cache._cache["foo"] == "bar"
+    assert cache.cache_dir.joinpath("foo").exists()
+    assert cache.cache_dir.joinpath("foo").read_text() == "bar"
+
+
+def test_clean(cache) -> None:
+    cache.cache_dir.mkdir(exist_ok=True)
+    test_file_one = cache.cache_dir.joinpath("one")
+    test_file_two = cache.cache_dir.joinpath("two")
     test_file_one.write_text("foo")
     test_file_two.write_text("bar")
+    cache._load()
 
-    Cache.get("two")
-    Cache.set("three", "baz")
+    cache.get("two")
+    cache.set("three", "baz")
 
-    Cache.evict_unused()
+    cache.evict_unused()
 
     assert not test_file_one.exists()
-    assert Cache.cache_dir.joinpath("two").exists()
-    assert Cache.cache_dir.joinpath("three").exists()
-    assert Cache.get("one") is None
-    assert "one" not in Cache._cache
+    assert cache.cache_dir.joinpath("two").exists()
+    assert cache.cache_dir.joinpath("three").exists()
+    assert cache.get("one") is None
+    assert "one" not in cache._cache

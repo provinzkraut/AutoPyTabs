@@ -77,7 +77,7 @@ class UpgradeMixin(SphinxDirective):
     def _create_py_tab_nodes(self, code: str) -> List[Node]:
         version_requirements = self.config["auto_pytabs_versions"]
         versioned_code = version_code(
-            code, version_requirements, no_cache=self.config["auto_pytabs_no_cache"]
+            code, version_requirements, cache=self.config["auto_pytabs_cache"]
         )
         tabs = self._create_tabs(
             versioned_code, self.env.config["auto_pytabs_tab_title_template"]
@@ -145,10 +145,14 @@ def on_config_inited(app: Sphinx, config: Config) -> None:
     config["auto_pytabs_versions"] = get_version_requirements(
         config["auto_pytabs_min_version"], config["auto_pytabs_max_version"]
     )
+    app.config["auto_pytabs_cache"] = (
+        Cache() if not config["auto_pytabs_no_cache"] else None
+    )
 
 
 def on_build_finished(app: Sphinx, exception: Exception | None) -> None:
-    Cache.evict_unused()
+    if cache := app.config["auto_pytabs_cache"]:
+        cache.evict_unused()
 
 
 def base_setup(app: Sphinx) -> Dict[str, bool | str]:

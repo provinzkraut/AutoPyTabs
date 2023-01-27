@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from hashlib import md5
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple, Optional, Set
-import shutil
 
 import autoflake  # type: ignore
 from pyupgrade._data import Settings as PyUpgradeSettings  # type: ignore
@@ -25,67 +25,58 @@ VersionedCode = Dict[VersionTuple, str]
 
 
 class Cache:
-    _initialised = False
-    _cache: Dict[str, str] = {}
-    _touched: Set[str] = set()
-    cache_dir = Path(".auto_pytabs_cache")
+    def __init__(self) -> None:
+        self.cache_dir = Path(".auto_pytabs_cache")
+        self._cache: Dict[str, str] = {}
+        self._touched: Set[str] = set()
+        self._load()
 
-    @classmethod
-    def _initialise(cls) -> None:
-        if cls._initialised:
-            return
-
-        cls.cache_dir.mkdir(exist_ok=True)
+    def _load(self) -> None:
+        self.cache_dir.mkdir(exist_ok=True)
 
         cache: Dict[str, str] = {}
         with ThreadPoolExecutor() as executor:
             futures = {
                 executor.submit(file.read_text): file.name
-                for file in cls.cache_dir.iterdir()
+                for file in self.cache_dir.iterdir()
             }
             for future in as_completed(futures):
                 cache[futures[future]] = future.result()
-        cls._cache.update(cache)
-        cls._initialised = True
+        self._cache.update(cache)
 
     @staticmethod
     def make_cache_key(*parts: Any) -> str:
         return md5("".join(map(str, parts)).encode()).hexdigest()
 
-    @classmethod
-    def get(cls, key: str) -> Optional[str]:
-        cls._initialise()
-        cls._touched.add(key)
-        return cls._cache.get(key)
+    def get(self, key: str) -> Optional[str]:
+        self._touched.add(key)
+        return self._cache.get(key)
 
-    @classmethod
-    def set(cls, key: str, content: str) -> None:
-        cls._initialise()
-        cls._cache[key] = content
-        cls._touched.add(key)
-        cls.cache_dir.joinpath(key).write_text(content)
+    def set(self, key: str, content: str) -> None:
+        self._cache[key] = content
+        self._touched.add(key)
+        self.cache_dir.joinpath(key).write_text(content)
 
-    @classmethod
-    def clear_all(cls) -> None:
-        cls._cache = {}
-        cls._touched = set()
-        cls._initialised = False
+    def clear_all(self) -> None:
+        self._cache = {}
+        self._touched = set()
+        self._initialised = False
 
-        if not cls.cache_dir.exists():
+        if not self.cache_dir.exists():
             return
 
-        shutil.rmtree(cls.cache_dir)
+        shutil.rmtree(self.cache_dir)
+        self.cache_dir.mkdir()
 
-    @classmethod
-    def evict_unused(cls) -> None:
-        if not cls.cache_dir.exists():
+    def evict_unused(self) -> None:
+        if not self.cache_dir.exists():
             return
 
         with ThreadPoolExecutor() as executor:
-            for key in cls._cache.keys() - cls._touched:
-                executor.submit(cls.cache_dir.joinpath(key).unlink, missing_ok=True)
-                if key in cls._cache:
-                    del cls._cache[key]
+            for key in self._cache.keys() - self._touched:
+                executor.submit(self.cache_dir.joinpath(key).unlink, missing_ok=True)
+                if key in self._cache:
+                    del self._cache[key]
 
 
 def get_version_requirements(
@@ -100,12 +91,14 @@ def get_version_requirements(
     ]
 
 
-def upgrade_code(code: str, min_version: VersionTuple, no_cache: bool = False) -> str:
+def upgrade_code(
+    code: str, min_version: VersionTuple, cache: Cache | None = None
+) -> str:
     cache_key: str | None = None
-    if not no_cache:
-        cache_key = Cache.make_cache_key(code, min_version)
+    if cache:
+        cache_key = cache.make_cache_key(code, min_version)
 
-        if cached_code := Cache.get(cache_key):
+        if cached_code := cache.get(cache_key):
             return cached_code
 
     upgraded_code = _fix_plugins(
@@ -120,20 +113,20 @@ def upgrade_code(code: str, min_version: VersionTuple, no_cache: bool = False) -
     if upgraded_code != code:
         code = autoflake.fix_code(upgraded_code, remove_all_unused_imports=True)
 
-    if cache_key:
-        Cache.set(cache_key, code)
+    if cache_key and cache:
+        cache.set(cache_key, code)
 
     return code
 
 
 def version_code(
-    code: str, version_requirements: List[VersionTuple], no_cache: bool = False
+    code: str, version_requirements: List[VersionTuple], cache: Optional[Cache] = None
 ) -> VersionedCode:
     latest_code = code
     versioned_code: VersionedCode = {version_requirements[0]: code}
 
     for version in version_requirements:
-        upgraded_code = upgrade_code(latest_code, version, no_cache=no_cache)
+        upgraded_code = upgrade_code(latest_code, version, cache=cache)
         if upgraded_code != latest_code:
             versioned_code[version] = upgraded_code
             latest_code = upgraded_code
