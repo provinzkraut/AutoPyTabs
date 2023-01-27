@@ -27,18 +27,33 @@ VersionedCode = Dict[VersionTuple, str]
 class Cache:
     def __init__(self) -> None:
         self.cache_dir = Path(".auto_pytabs_cache")
+        self.cache_content_dir = self.cache_dir / "content"
         self._cache: Dict[str, str] = {}
         self._touched: Set[str] = set()
         self._load()
 
+    def _init_cache_dir(self) -> None:
+        self.cache_content_dir.mkdir(exist_ok=True, parents=True)
+        cachedir_tag = self.cache_dir / "CACHEDIR.TAG"
+        gitignore_file = self.cache_dir / ".gitignore"
+        if not cachedir_tag.exists():
+            cachedir_tag.write_text(
+                """Signature: 8a477f597d28d172789f06886806bc55
+# This file is a cache directory tag created by (application name).
+# For information about cache directory tags, see:
+#	http://www.brynosaurus.com/cachedir/"""
+            )
+        if not gitignore_file.exists():
+            gitignore_file.write_text("*\n")
+
     def _load(self) -> None:
-        self.cache_dir.mkdir(exist_ok=True)
+        self._init_cache_dir()
 
         cache: Dict[str, str] = {}
         with ThreadPoolExecutor() as executor:
             futures = {
                 executor.submit(file.read_text): file.name
-                for file in self.cache_dir.iterdir()
+                for file in self.cache_content_dir.iterdir()
             }
             for future in as_completed(futures):
                 cache[futures[future]] = future.result()
@@ -55,18 +70,16 @@ class Cache:
     def set(self, key: str, content: str) -> None:
         self._cache[key] = content
         self._touched.add(key)
-        self.cache_dir.joinpath(key).write_text(content)
+        self.cache_content_dir.joinpath(key).write_text(content)
 
     def clear_all(self) -> None:
         self._cache = {}
         self._touched = set()
-        self._initialised = False
 
         if not self.cache_dir.exists():
             return
 
         shutil.rmtree(self.cache_dir)
-        self.cache_dir.mkdir()
 
     def evict_unused(self) -> None:
         if not self.cache_dir.exists():
@@ -74,7 +87,9 @@ class Cache:
 
         with ThreadPoolExecutor() as executor:
             for key in self._cache.keys() - self._touched:
-                executor.submit(self.cache_dir.joinpath(key).unlink, missing_ok=True)
+                executor.submit(
+                    self.cache_content_dir.joinpath(key).unlink, missing_ok=True
+                )
                 if key in self._cache:
                     del self._cache[key]
 
