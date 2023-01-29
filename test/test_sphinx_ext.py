@@ -34,8 +34,8 @@ def test_upgrade_tabs_all_versions(
     no_cache: bool,
     compat: bool,
     source: str,
+    mock_cache_persist,
 ):
-
     builder = sphinx_builder(
         source=source, auto_pytabs_no_cache=no_cache, compat=compat
     )
@@ -44,6 +44,11 @@ def test_upgrade_tabs_all_versions(
 
     pformat = builder.get_doctree("index").pformat()
     file_regression.check(pformat, fullpath=TEST_DATA_DIR / "tabs_all_versions.xml")
+
+    if no_cache:
+        mock_cache_persist.assert_not_called()
+    else:
+        mock_cache_persist.assert_called_once_with()
 
 
 def test_upgrade_single_version(

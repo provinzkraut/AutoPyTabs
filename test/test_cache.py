@@ -28,12 +28,10 @@ def test_set(cache) -> None:
     cache.set("foo", "bar")
 
     assert cache.get("foo") == "bar"
-    assert cache._cache["foo"] == "bar"
-    assert cache.cache_content_dir.joinpath("foo").exists()
-    assert cache.cache_content_dir.joinpath("foo").read_text() == "bar"
 
 
-def test_evict_unused(cache) -> None:
+@pytest.mark.parametrize("evict", [True, False])
+def test_persist(cache: Cache, evict: bool) -> None:
     test_file_one = cache.cache_content_dir.joinpath("one")
     test_file_two = cache.cache_content_dir.joinpath("two")
     test_file_one.write_text("foo")
@@ -43,13 +41,14 @@ def test_evict_unused(cache) -> None:
     cache.get("two")
     cache.set("three", "baz")
 
-    cache.evict_unused()
+    cache.persist(evict=evict)
 
-    assert not test_file_one.exists()
+    if evict:
+        assert not test_file_one.exists()
+    else:
+        assert test_file_one.exists()
     assert cache.cache_content_dir.joinpath("two").exists()
     assert cache.cache_content_dir.joinpath("three").exists()
-    assert cache.get("one") is None
-    assert "one" not in cache._cache
 
 
 def test_clear_all(cache) -> None:

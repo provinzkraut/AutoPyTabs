@@ -156,7 +156,7 @@ def on_config_inited(app: Sphinx, config: Config) -> None:
 
 def on_build_finished(app: Sphinx, exception: Exception | None) -> None:
     if cache := app.config["auto_pytabs_cache"]:
-        cache.evict_unused()
+        cache.persist()
 
 
 def setup(app: Sphinx) -> Dict[str, bool | str]:

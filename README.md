@@ -118,11 +118,11 @@ AutoPyTabs ships as a markdown extension and an mkdocs plugin, both of which can
 between them is that the mkdocs plugin supports caching, which can make subsequent builds faster (i.e. when using `mkdocs serve`).
 The reason why the markdown extension does not support caching is that `markdown` does not have clearly defined build
 steps with wich an extension could interact (like mkdocs [plugin events](https://www.mkdocs.org/dev-guide/plugins/#events)),
-making it impossible to know when to evict files from the cache, resulting in a potentially infinitely growing cache.
+making it impossible to know when to persist cached items to disk / evict unused items.
 
 **If you are using mkdocs, the mkdocs plugin is recommended**. If you have caching disabled, there will be no difference either way.
 
-Should you wish to integrate the markdown extension into a build process where you can manually perform cache evictions after the build,
+Should you wish to integrate the markdown extension into a build process where you can manually persist the cache after the build,
 you can explicitly pass it a cache:
 
 ```python
@@ -143,7 +143,7 @@ md = markdown.Markdown(
 
 def build_markdown() -> None:
     md.convertFile("document.md", "document.html")
-    cache.evict_unused()
+    cache.persist()
 ```
 
 <h3 id="markdown-examples">Examples</h3>

@@ -25,6 +25,13 @@ VersionedCode = Dict[VersionTuple, str]
 
 
 class Cache:
+    """
+    Simple hybrid file system / memory cache.
+
+    Follows the
+    `Cache Directory Tagging Specification http://www.brynosaurus.com/cachedir/>`_.
+    """
+
     def __init__(self) -> None:
         self.cache_dir = Path(".auto_pytabs_cache")
         self.cache_content_dir = self.cache_dir / "content"
@@ -61,18 +68,36 @@ class Cache:
 
     @staticmethod
     def make_cache_key(*parts: Any) -> str:
+        """Create a cache key using an md5 hash of ``parts``"""
         return md5("".join(map(str, parts)).encode()).hexdigest()
 
     def get(self, key: str) -> Optional[str]:
+        """Get an item specified by ``key`` the cache"""
         self._touched.add(key)
         return self._cache.get(key)
 
     def set(self, key: str, content: str) -> None:
+        """Store an ``content``"""
         self._cache[key] = content
         self._touched.add(key)
-        self.cache_content_dir.joinpath(key).write_text(content)
+
+    def persist(self, evict: bool = True) -> None:
+        """
+        Persist internal cache to disk. If ``evict`` is ``True``, evict unused items
+        """
+        with ThreadPoolExecutor() as executor:
+            for key, content in self._cache.items():
+                if key in self._touched:
+                    executor.submit(
+                        self.cache_content_dir.joinpath(key).write_text, content
+                    )
+                elif evict:
+                    executor.submit(
+                        self.cache_content_dir.joinpath(key).unlink, missing_ok=True
+                    )
 
     def clear_all(self) -> None:
+        """Clear all cached items from memory and disk"""
         self._cache = {}
         self._touched = set()
 
@@ -81,22 +106,11 @@ class Cache:
 
         shutil.rmtree(self.cache_dir)
 
-    def evict_unused(self) -> None:
-        if not self.cache_dir.exists():
-            return
-
-        with ThreadPoolExecutor() as executor:
-            for key in self._cache.keys() - self._touched:
-                executor.submit(
-                    self.cache_content_dir.joinpath(key).unlink, missing_ok=True
-                )
-                if key in self._cache:
-                    del self._cache[key]
-
 
 def get_version_requirements(
     min_version: VersionTuple, max_version: VersionTuple
 ) -> List[VersionTuple]:
+    """Given a min and max version, generate all versions in between"""
     min_major, min_minor = min_version
     max_major, max_minor = max_version
     return [
@@ -106,10 +120,10 @@ def get_version_requirements(
     ]
 
 
-def upgrade_code(
-    code: str, min_version: VersionTuple, cache: Cache | None = None
+def _upgrade_code(
+    code: str, min_version: VersionTuple, cache: Optional[Cache] = None
 ) -> str:
-    cache_key: str | None = None
+    cache_key: Optional[str] = None
     if cache:
         cache_key = cache.make_cache_key(code, min_version)
 
@@ -137,11 +151,13 @@ def upgrade_code(
 def version_code(
     code: str, version_requirements: List[VersionTuple], cache: Optional[Cache] = None
 ) -> VersionedCode:
+    """Create versions of ``code`` for all python versions specified in
+    ``version_requirements`` and return a dictionary of version-tuples/code"""
     latest_code = code
     versioned_code: VersionedCode = {version_requirements[0]: code}
 
     for version in version_requirements:
-        upgraded_code = upgrade_code(latest_code, version, cache=cache)
+        upgraded_code = _upgrade_code(latest_code, version, cache=cache)
         if upgraded_code != latest_code:
             versioned_code[version] = upgraded_code
             latest_code = upgraded_code

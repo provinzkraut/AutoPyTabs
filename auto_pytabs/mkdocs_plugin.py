@@ -39,8 +39,8 @@ class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-cal
 
     def on_post_build(self, config: MkDocsConfig) -> None:
         if self.cache:
-            self.cache.evict_unused()
+            self.cache.persist()
 
     def on_build_error(self, error: Exception) -> None:
         if self.cache:
-            self.cache.evict_unused()
+            self.cache.persist(evict=False)

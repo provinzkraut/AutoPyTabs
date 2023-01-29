@@ -93,19 +93,17 @@ def test_config(
     assert config["mdx_configs"]["auto_pytabs"]["cache"] is plugin.cache
 
 
-def test_on_post_build(configured_plugin, mocker) -> None:
-    mock_evict_unused = mocker.patch("auto_pytabs.core.Cache.evict_unused")
+def test_on_post_build(configured_plugin, mock_cache_persist) -> None:
     plugin, config = configured_plugin
 
     plugin.on_post_build(config)
 
-    mock_evict_unused.assert_called_once()
+    mock_cache_persist.assert_called_once_with()
 
 
-def test_on_build_error(configured_plugin, mocker) -> None:
-    mock_evict_unused = mocker.patch("auto_pytabs.core.Cache.evict_unused")
+def test_on_build_error(configured_plugin, mock_cache_persist) -> None:
     plugin, config = configured_plugin
 
     plugin.on_build_error(ValueError())
 
-    mock_evict_unused.assert_called_once()
+    mock_cache_persist.assert_called_once_with(evict=False)

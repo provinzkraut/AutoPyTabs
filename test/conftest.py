@@ -8,7 +8,8 @@ from __future__ import annotations
 import os
 import shutil
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
+from unittest.mock import MagicMock
 
 import pytest
 from docutils import nodes
@@ -25,6 +26,11 @@ def purge_cache():
     Cache().clear_all()
     yield
     Cache().clear_all()
+
+
+@pytest.fixture()
+def mock_cache_persist(mocker) -> MagicMock:
+    return mocker.patch("auto_pytabs.core.Cache.persist")
 
 
 class SphinxBuilder:
@@ -77,8 +83,10 @@ def sphinx_builder(tmp_path: Path, make_app, monkeypatch):
     def _create_project(
         source: str,
         compat: bool = False,
-        **conf_kwargs: dict[str, Any],
+        **conf_kwargs: Dict[str, Any],
     ):
+        if compat:
+            conf_kwargs["auto_pytabs_compat_mode"] = True
         src_path = tmp_path / "srcdir"
         src_path.mkdir()
         conf_kwargs = {
@@ -89,8 +97,6 @@ def sphinx_builder(tmp_path: Path, make_app, monkeypatch):
             "auto_pytabs_no_cache": True,
             **(conf_kwargs or {}),
         }
-        if compat:
-            conf_kwargs["auto_pytabs_compat_mode"] = compat
         content = "\n".join(
             [f"{key} = {value!r}" for key, value in conf_kwargs.items()]
         )

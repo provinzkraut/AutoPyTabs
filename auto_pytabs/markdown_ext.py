@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Literal, Set, Tuple, cast
+from typing import Any, Dict, List, Literal, Optional, Set, Tuple, cast
 
 import markdown
 from markdown import Extension
@@ -49,7 +49,7 @@ def _get_pytabs_directive(line: str) -> PyTabDirective | None:
     return None
 
 
-def extract_code_blocks(lines: List[str]) -> Tuple[List[str], Dict[int, List[str]]]:
+def _extract_code_blocks(lines: List[str]) -> Tuple[List[str], Dict[int, List[str]]]:
     in_block = False
     enabled = True
     new_lines: List[str] = []
@@ -102,7 +102,7 @@ def _build_tabs(
     return "\n".join(out)
 
 
-def convert_block(
+def _convert_block(
     *,
     block: List[str],
     versions: List[VersionTuple],
@@ -147,13 +147,13 @@ class UpgradePreprocessor(Preprocessor):
         super().__init__(*args, **kwargs)
 
     def run(self, lines: List[str]) -> List[str]:
-        new_lines, to_transform = extract_code_blocks(lines)
+        new_lines, to_transform = _extract_code_blocks(lines)
 
         output_lines = []
         for i, line in enumerate(new_lines):
             block_to_transform = to_transform.get(i)
             if block_to_transform:
-                transformed_block = convert_block(
+                transformed_block = _convert_block(
                     block=block_to_transform,
                     versions=self.versions,
                     tab_title_template=self.tab_title_template,
@@ -167,9 +167,7 @@ class UpgradePreprocessor(Preprocessor):
 
 
 class AutoPyTabsExtension(Extension):
-    def __init__(self, *args: Any, cache: Cache | None, **kwargs: Any):
-        """Initialize."""
-
+    def __init__(self, *args: Any, cache: Optional[Cache], **kwargs: Any):
         self.config = {
             "min_version": ["3.7", "minimum version"],
             "max_version": ["3.11", "maximum version"],
