@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from hashlib import md5
+from hashlib import sha1
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple, Optional, Set
 
@@ -69,7 +69,7 @@ class Cache:
     @staticmethod
     def make_cache_key(*parts: Any) -> str:
         """Create a cache key using an md5 hash of ``parts``"""
-        return md5("".join(map(str, parts)).encode()).hexdigest()
+        return sha1("".join(map(str, parts)).encode()).hexdigest()
 
     def get(self, key: str) -> Optional[str]:
         """Get an item specified by ``key`` the cache"""
