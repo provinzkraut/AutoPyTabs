@@ -149,13 +149,17 @@ def on_config_inited(app: Sphinx, config: Config) -> None:
         Cache() if not config["auto_pytabs_no_cache"] else None
     )
 
+    if not config["auto_pytabs_compat_mode"]:
+        app.add_directive("code-block", CodeBlockOverride, override=True)
+        app.add_directive("literalinclude", LiteralIncludeOverride, override=True)
+
 
 def on_build_finished(app: Sphinx, exception: Exception | None) -> None:
     if cache := app.config["auto_pytabs_cache"]:
         cache.evict_unused()
 
 
-def base_setup(app: Sphinx) -> Dict[str, bool | str]:
+def setup(app: Sphinx) -> Dict[str, bool | str]:
     app.add_directive("pytabs-code-block", PyTabsCodeBlock)
     app.add_directive("pytabs-literalinclude", PyTabsLiteralInclude)
 
@@ -167,6 +171,7 @@ def base_setup(app: Sphinx) -> Dict[str, bool | str]:
     app.add_config_value("auto_pytabs_min_version", default=(3, 7), rebuild="html")
     app.add_config_value("auto_pytabs_max_version", default=(3, 11), rebuild="html")
     app.add_config_value("auto_pytabs_no_cache", default=False, rebuild="html")
+    app.add_config_value("auto_pytabs_compat_mode", default=False, rebuild="html")
 
     app.connect("config-inited", on_config_inited)
 
@@ -177,10 +182,3 @@ def base_setup(app: Sphinx) -> Dict[str, bool | str]:
         "parallel_read_safe": True,
         "parallel_write_safe": True,
     }
-
-
-def setup(app: Sphinx) -> Dict[str, bool | str]:
-    app.add_directive("code-block", CodeBlockOverride, override=True)
-    app.add_directive("literalinclude", LiteralIncludeOverride, override=True)
-
-    return base_setup(app)

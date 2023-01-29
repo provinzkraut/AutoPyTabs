@@ -87,9 +87,9 @@ def test_upgrade_versions(
 
     pformat = builder.get_doctree("index").pformat()
 
-    comp_data_file = TEST_DATA_DIR / (
-        f"tabs_versions_min-{min_version[0]}{min_version[1]}_"
-        f"max-{max_version[0]}{max_version[1]}.xml"
+    file_regression.check(
+        pformat,
+        fullpath=TEST_DATA_DIR.joinpath(
+            f"tabs_versions_min-{min_version[0]}{min_version[1]}_max-{max_version[0]}{max_version[1]}.xml"
+        ),
     )
-
-    file_regression.check(pformat, fullpath=comp_data_file)

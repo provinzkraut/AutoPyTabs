@@ -84,11 +84,13 @@ def sphinx_builder(tmp_path: Path, make_app, monkeypatch):
         conf_kwargs = {
             "extensions": [
                 "sphinx_design",
-                "auto_pytabs.sphinx_ext_compat" if compat else "auto_pytabs.sphinx_ext",
+                "auto_pytabs.sphinx_ext",
             ],
             "auto_pytabs_no_cache": True,
             **(conf_kwargs or {}),
         }
+        if compat:
+            conf_kwargs["auto_pytabs_compat_mode"] = compat
         content = "\n".join(
             [f"{key} = {value!r}" for key, value in conf_kwargs.items()]
         )
