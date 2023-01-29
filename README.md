@@ -1,17 +1,42 @@
 # AutoPyTabs
 
-Tooling to automatically generate tabbed code examples for different Python versions in
+Automatically generate code examples for different Python versions in
 [mkdocs](https://www.mkdocs.org) or [Sphinx](https://www.sphinx-doc.org) based documentations, or a plain
 [markdown](https://python-markdown.github.io/) workflow, making use of the
 [pymdown "tabbed"](https://facelessuser.github.io/pymdown-extensions/extensions/tabbed/) markdown extension for markdown,
 and [sphinx{design} tabs](https://sphinx-design.readthedocs.io/en/latest/tabs.html) for Sphinx.
 
-## Motivation
+## Rationale
 
-Writing and maintaining documentation can be tedious, especially the task of including
-code snippets for different versions of Python. AutoPyTabs aims to solve this problem
-by automatically generating those "versioned snippets" at build-time, which means
-there's only *one* file to maintain, and to be checked into VCS.
+### The problem
+
+Python project documentation typically include code examples. Given that most of the time, a project will support
+multiple versions of Python, it would be ideal to showcase the adjustments that can or need to be made for different
+Python versions. This can be achieved by including several versions of the example code, conveniently displayed using
+the [pymdown "tabbed"](https://facelessuser.github.io/pymdown-extensions/extensions/tabbed/) extension for markdown, or
+[sphinx{design} tabs](https://sphinx-design.readthedocs.io/en/latest/tabs.html) for Sphinx.
+
+This, however, raises several problems:
+
+1. Maintaining multiple versions of a single example is tedious and error-prone as they can easily
+   become out of sync
+2. Figuring out which examples need to be changed for which specific Python version is a labour intensive task
+3. Dropping or adding support for Python versions requires revisiting every example in the documentation
+4. Checking potentially ~4 versions of a single example into VCS creates unnecessary noise
+
+Given those, it's no surprise that the current standard is to only show examples for the lowest  supported version of Python.
+
+### The solution
+
+**AutoPyTabs** aims to solve all of these problems by automatically generating versions of code examples, targeting different
+Python versions **at build-time**, based on a base version (the lowest supported Python version).
+This means that:
+
+1. There exists only one version of each example: The lowest supported version becomes the source of truth,
+   therefore preventing out-of-sync examples and reducing maintenance burden
+2. Dropping or adding support for Python versions can be done via a simple change in a configuration file
+
+<hr>
 
 ## Table of contents
 
@@ -27,6 +52,8 @@ there's only *one* file to maintain, and to be checked into VCS.
    3. [Examples](#sphinx-examples)
    4. [Compatibility with other extensions](#compatibility-with-other-extensions)
 
+<hr> 
+
 ## Installation
 
 For mkdocs: `pip install auto-pytabs[mkdocs]`
@@ -37,7 +64,7 @@ For sphinx: `pip install auto-pytabs[sphinx]`
 
 <h3 id="markdown-config">Configuration</h3>
 
-**Mkdocs plugin**
+#### Mkdocs plugin
 
 ```yaml
 site_name: My Docs
@@ -51,7 +78,16 @@ plugins:
       no_cache: false  # optional
 ```
 
-**Markdown extension**
+*Available configuration options*
+
+| Name                 | Default                   | Description                 |
+| -------------------- | ------------------------- | --------------------------- |
+| `min_version`        | `(3, 7)`                  | Minimum python version      |
+| `max_version`        | `(3, 7)`                  | Maximum python version      |
+| `tab_title_template` | `"Python {min_version}+"` | Template for tab titles     |
+| `no_cache`           | `False`                   | Disable file system caching |
+
+#### Markdown extension
 
 ```python
 import markdown
@@ -67,6 +103,14 @@ md = markdown.Markdown(
     },
 )
 ```
+
+*Available configuration options*
+
+| Name                 | Default                   | Description                                 |
+| -------------------- | ------------------------- | ------------------------------------------- |
+| `min_version`        | `(3, 7)`                  | Minimum python version to generate code for |
+| `max_version`        | `(3, 7)`                  | Maximum python version to generate code for |
+| `tab_title_template` | `"Python {min_version}+"` | Template for tab titles                     |
 
 ### Differences between the mkdocs plugin and markdown extension
 
@@ -221,6 +265,8 @@ re-enables conversion again
 
 If the `pymdownx.snippets` extension is used, make sure that it runs **before** AutoPyTab
 
+<hr>
+
 ## Usage with Sphinx
 
 AutPyTabs provides a Sphinx extension `auto_pytabs.sphinx_ext`, enabling its functionality
@@ -228,14 +274,27 @@ for the `.. code-block` and `.. literalinclude` directives.
 
 <h3 id="sphinx-config">Configuration</h3>
 
+#### Example configuration
+
 ```python
 extensions = ["auto_pytabs.sphinx_ext", "sphinx_design"]
 
 auto_pytabs_min_version = (3, 7)  # optional
 auto_pytabs_max_version = (3, 11)  # optional
 auto_pytabs_tab_title_template = "Python {min_version}+"  # optional 
-auto_pytabs_no_cache = True  # disabled caching
+# auto_pytabs_no_cache = True  # disabled file system caching
+# auto_pytabs_compat_mode = True  # enable compatibility mode
 ```
+
+#### Available configuration options
+
+| Name                             | Default                   | Description                                      |
+| -------------------------------- | ------------------------- | ------------------------------------------------ |
+| `auto_pytabs_min_version`        | `(3, 7)`                  | Minimum python version to generate code for      |
+| `auto_pytabs_max_version`        | `(3, 7)`                  | Maximum python version to generate code for      |
+| `auto_pytabs_tab_title_template` | `"Python {min_version}+"` | Template for tab titles                          |
+| `auto_pytabs_no_cache`           | `False`                   | Disable file system caching                      |
+| `auto_pytabs_compat_mode`        | `False`                   | Enable [compatibility mode](#compatibility-mode) |
 
 <h3 id="sphinx-examples">Examples</h3>
 
@@ -305,8 +364,8 @@ and are mainly to provide AutoPyTab's functionality in [compatibility mode](#com
 If you don't want the default behaviour of directive overrides, and instead wish to use the
 `.. pytabs-` directives manually (e.g. because of compatibility issues with other extensions
 or because you only want to apply it to select code blocks) you can make use AutoPyTabs' compatibility
-mode. To enable it, simply use the `auto_pytabs.sphinx_ext_compat` extension instead of
-`auto_pytabs.sphinx_ext`. Now, only content within `.. pytabs-` directives will be upgraded.
+mode. To enable it, simply use the `auto_pytabs_compat_mode = True` in `conf.py`. Now, only content within `.. pytabs-`
+directives will be upgraded.
 
 ### Compatibility with other extensions
 
