@@ -19,5 +19,5 @@ jobs:
         run: poetry install --no-root --no-dev
       - name: build & publish
         run: |
-          poetry config pypi-token.testpypi ${{ secrets.PYPI_TOKEN }}
+          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
           poetry publish --build
