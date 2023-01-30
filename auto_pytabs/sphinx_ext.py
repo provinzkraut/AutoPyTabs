@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, List, TYPE_CHECKING, cast
+from typing import Any, Dict, Iterable, List, Optional, TYPE_CHECKING, cast
 
 from docutils.nodes import Node, container, section
 from docutils.parsers.rst import directives
 from docutils.statemachine import ViewList
 from sphinx.config import Config
 from sphinx.directives.code import CodeBlock, LiteralInclude
+from sphinx.environment import BuildEnvironment
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.nodes import nested_parse_with_titles
 
@@ -74,11 +75,13 @@ class UpgradeMixin(SphinxDirective):
             )
         return out
 
+    @property
+    def cache(self) -> Optional[Cache]:
+        return getattr(self.env, "auto_pytabs_cache", None)
+
     def _create_py_tab_nodes(self, code: str) -> List[Node]:
         version_requirements = self.config["auto_pytabs_versions"]
-        versioned_code = version_code(
-            code, version_requirements, cache=self.config["auto_pytabs_cache"]
-        )
+        versioned_code = version_code(code, version_requirements, cache=self.cache)
         tabs = self._create_tabs(
             versioned_code, self.env.config["auto_pytabs_tab_title_template"]
         )
@@ -145,9 +148,6 @@ def on_config_inited(app: Sphinx, config: Config) -> None:
     config["auto_pytabs_versions"] = get_version_requirements(
         config["auto_pytabs_min_version"], config["auto_pytabs_max_version"]
     )
-    app.config["auto_pytabs_cache"] = (
-        Cache() if not config["auto_pytabs_no_cache"] else None
-    )
 
     if not config["auto_pytabs_compat_mode"]:
         app.add_directive("code-block", CodeBlockOverride, override=True)
@@ -155,8 +155,25 @@ def on_config_inited(app: Sphinx, config: Config) -> None:
 
 
 def on_build_finished(app: Sphinx, exception: Exception | None) -> None:
-    if cache := app.config["auto_pytabs_cache"]:
+    if cache := getattr(app.env, "auto_pytabs_cache", None):
         cache.persist()
+
+
+def on_env_before_read_docs(
+    app: Sphinx, env: BuildEnvironment, docnames: List[str]
+) -> None:
+    if not app.config["auto_pytabs_no_cache"]:
+        env.auto_pytabs_cache = Cache()  # type: ignore[attr-defined]
+
+
+def on_env_merge_info(
+    app: Sphinx, env: BuildEnvironment, docnames: List[str], other: BuildEnvironment
+) -> None:
+    cache: Optional[Cache] = getattr(env, "auto_pytabs_cache", None)
+    other_cache: Optional[Cache] = getattr(other, "auto_pytabs_cache", None)
+    if cache and other_cache:
+        cache._touched.update(other_cache._touched)
+        cache._cache.update(other_cache._cache)
 
 
 def setup(app: Sphinx) -> Dict[str, bool | str]:
@@ -174,8 +191,9 @@ def setup(app: Sphinx) -> Dict[str, bool | str]:
     app.add_config_value("auto_pytabs_compat_mode", default=False, rebuild="html")
 
     app.connect("config-inited", on_config_inited)
-
     app.connect("build-finished", on_build_finished)
+    app.connect("env-before-read-docs", on_env_before_read_docs)
+    app.connect("env-merge-info", on_env_merge_info)
 
     return {
         "version": "0.1",
