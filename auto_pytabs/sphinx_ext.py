@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import importlib
+import importlib.metadata
 from typing import Any, Dict, Iterable, List, Optional, TYPE_CHECKING, cast
 
 from docutils.nodes import Node, container, section
@@ -196,7 +198,7 @@ def setup(app: Sphinx) -> Dict[str, bool | str]:
     app.connect("env-merge-info", on_env_merge_info)
 
     return {
-        "version": "0.1",
+        "version": importlib.metadata.version("auto_pytabs"),
         "parallel_read_safe": True,
         "parallel_write_safe": True,
     }
