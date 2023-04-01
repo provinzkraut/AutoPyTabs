@@ -1,14 +1,25 @@
 from __future__ import annotations
 
 import shutil
+import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from hashlib import sha1
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Optional, Set
+from typing import Any, NamedTuple
 
-import autoflake  # type: ignore
-from pyupgrade._data import Settings as PyUpgradeSettings  # type: ignore
-from pyupgrade._main import _fix_plugins  # type: ignore
+RUFF_BASE_ARGS = [
+    "ruff",
+    "--no-cache",
+    "--fix",
+    "--quiet",
+    "--select",
+    "UP",
+    "--select",
+    "F401",
+    "--isolated",
+    "-",
+    "--target-version",
+]
 
 
 class VersionTuple(NamedTuple):
@@ -21,12 +32,11 @@ class VersionTuple(NamedTuple):
         return VersionTuple(major=int(major), minor=int(minor))
 
 
-VersionedCode = Dict[VersionTuple, str]
+VersionedCode = dict[VersionTuple, str]
 
 
 class Cache:
-    """
-    Simple hybrid file system / memory cache.
+    """Simple hybrid file system / memory cache.
 
     Follows the
     `Cache Directory Tagging Specification http://www.brynosaurus.com/cachedir/>`_.
@@ -35,8 +45,8 @@ class Cache:
     def __init__(self) -> None:
         self.cache_dir = Path(".auto_pytabs_cache")
         self.cache_content_dir = self.cache_dir / "content"
-        self._cache: Dict[str, str] = {}
-        self._touched: Set[str] = set()
+        self._cache: dict[str, str] = {}
+        self._touched: set[str] = set()
         self._load()
 
     def _init_cache_dir(self) -> None:
@@ -56,7 +66,7 @@ class Cache:
     def _load(self) -> None:
         self._init_cache_dir()
 
-        cache: Dict[str, str] = {}
+        cache: dict[str, str] = {}
         with ThreadPoolExecutor() as executor:
             futures = {
                 executor.submit(file.read_text): file.name
@@ -68,22 +78,22 @@ class Cache:
 
     @staticmethod
     def make_cache_key(*parts: Any) -> str:
-        """Create a cache key using an md5 hash of ``parts``"""
+        """Create a cache key using an md5 hash of ``parts``."""
         return sha1("".join(map(str, parts)).encode()).hexdigest()
 
-    def get(self, key: str) -> Optional[str]:
-        """Get an item specified by ``key`` the cache"""
+    def get(self, key: str) -> str | None:
+        """Get an item specified by ``key`` the cache."""
         self._touched.add(key)
         return self._cache.get(key)
 
     def set(self, key: str, content: str) -> None:
-        """Store an ``content``"""
+        """Store an ``content``."""
         self._cache[key] = content
         self._touched.add(key)
 
     def persist(self, evict: bool = True) -> None:
         """
-        Persist internal cache to disk. If ``evict`` is ``True``, evict unused items
+        Persist internal cache to disk. If ``evict`` is ``True``, evict unused items.
         """
         with ThreadPoolExecutor() as executor:
             for key, content in self._cache.items():
@@ -97,7 +107,7 @@ class Cache:
                     )
 
     def clear_all(self) -> None:
-        """Clear all cached items from memory and disk"""
+        """Clear all cached items from memory and disk."""
         self._cache = {}
         self._touched = set()
 
@@ -109,8 +119,8 @@ class Cache:
 
 def get_version_requirements(
     min_version: VersionTuple, max_version: VersionTuple
-) -> List[VersionTuple]:
-    """Given a min and max version, generate all versions in between"""
+) -> list[VersionTuple]:
+    """Given a min and max version, generate all versions in between."""
     min_major, min_minor = min_version
     max_major, max_minor = max_version
     return [
@@ -120,27 +130,28 @@ def get_version_requirements(
     ]
 
 
+def _run_ruff(source: str, target_version: str) -> str:
+    with subprocess.Popen(
+        [*RUFF_BASE_ARGS, target_version],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        stdin=subprocess.PIPE,
+        encoding="utf-8",
+    ) as process:
+        return process.communicate(input=source)[0]
+
+
 def _upgrade_code(
-    code: str, min_version: VersionTuple, cache: Optional[Cache] = None
+    code: str, min_version: VersionTuple, cache: Cache | None = None
 ) -> str:
-    cache_key: Optional[str] = None
+    cache_key: str | None = None
     if cache:
         cache_key = cache.make_cache_key(code, min_version)
 
         if cached_code := cache.get(cache_key):
             return cached_code
 
-    upgraded_code = _fix_plugins(
-        code,
-        settings=PyUpgradeSettings(
-            min_version=min_version,
-            keep_percent_format=True,
-            keep_mock=True,
-            keep_runtime_typing=True,
-        ),
-    )
-    if upgraded_code != code:
-        code = autoflake.fix_code(upgraded_code, remove_all_unused_imports=True)
+    code = _run_ruff(code, target_version=f"py3{min_version.minor}")
 
     if cache_key and cache:
         cache.set(cache_key, code)
@@ -149,10 +160,11 @@ def _upgrade_code(
 
 
 def version_code(
-    code: str, version_requirements: List[VersionTuple], cache: Optional[Cache] = None
+    code: str, version_requirements: list[VersionTuple], cache: Cache | None = None
 ) -> VersionedCode:
     """Create versions of ``code`` for all python versions specified in
-    ``version_requirements`` and return a dictionary of version-tuples/code"""
+    ``version_requirements`` and return a dictionary of version-tuples/code.
+    """
     latest_code = code
     versioned_code: VersionedCode = {version_requirements[0]: code}
 

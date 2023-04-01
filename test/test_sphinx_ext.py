@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Tuple
+from test.conftest import SphinxBuilder
+from typing import TYPE_CHECKING
 
 import pytest
 
-from test.conftest import SphinxBuilder
-from pytest_regressions.file_regression import FileRegressionFixture
+if TYPE_CHECKING:
+    from pytest_regressions.file_regression import FileRegressionFixture
 
 SphinxBuilderFixture = Callable[..., SphinxBuilder]
 
@@ -72,8 +74,8 @@ def test_upgrade_single_version(
     [((3, i), (3, j)) for i in range(8, 12) for j in range(7, 12) if i <= j],
 )
 def test_upgrade_versions(
-    min_version: Tuple[int, int],
-    max_version: Tuple[int, int],
+    min_version: tuple[int, int],
+    max_version: tuple[int, int],
     sphinx_builder: SphinxBuilderFixture,
     file_regression: FileRegressionFixture,
     compat: bool,

@@ -1,5 +1,4 @@
 import pytest
-
 from auto_pytabs.core import Cache
 
 

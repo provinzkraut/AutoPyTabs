@@ -1,28 +1,31 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Literal, Optional, Set, Tuple, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
-import markdown
 from markdown import Extension
 from markdown.preprocessors import Preprocessor
 
 from auto_pytabs.core import (
     Cache,
-    VersionTuple,
     VersionedCode,
+    VersionTuple,
     get_version_requirements,
     version_code,
 )
+
+if TYPE_CHECKING:
+    from markdown import Markdown
+
 
 RGX_BLOCK_TOKENS = re.compile(r"(.*```py[\w\W]*)|(.*```)")
 RGX_PYTABS_DIRECTIVE = re.compile(r"<!-- ?autopytabs: ?(.*)-->")
 
 PyTabDirective = Literal["disable", "enable", "disable-block"]
-PYTAB_DIRECTIVES: Set[PyTabDirective] = {"disable", "enable", "disable-block"}
+PYTAB_DIRECTIVES: set[PyTabDirective] = {"disable", "enable", "disable-block"}
 
 
-def _strip_indentation(lines: List[str]) -> Tuple[List[str], str]:
+def _strip_indentation(lines: list[str]) -> tuple[list[str], str]:
     if not lines:
         return [], ""
     first_line = lines[0]
@@ -49,10 +52,10 @@ def _get_pytabs_directive(line: str) -> PyTabDirective | None:
     return None
 
 
-def _extract_code_blocks(lines: List[str]) -> Tuple[List[str], Dict[int, List[str]]]:
+def _extract_code_blocks(lines: list[str]) -> tuple[list[str], dict[int, list[str]]]:
     in_block = False
     enabled = True
-    new_lines: List[str] = []
+    new_lines: list[str] = []
 
     to_transform = {}
 
@@ -104,8 +107,8 @@ def _build_tabs(
 
 def _convert_block(
     *,
-    block: List[str],
-    versions: List[VersionTuple],
+    block: list[str],
+    versions: list[VersionTuple],
     tab_title_template: str,
     cache: Cache | None,
 ) -> str:
@@ -146,7 +149,7 @@ class UpgradePreprocessor(Preprocessor):
         self.cache = cache
         super().__init__(*args, **kwargs)
 
-    def run(self, lines: List[str]) -> List[str]:
+    def run(self, lines: list[str]) -> list[str]:
         new_lines, to_transform = _extract_code_blocks(lines)
 
         output_lines = []
@@ -167,7 +170,7 @@ class UpgradePreprocessor(Preprocessor):
 
 
 class AutoPyTabsExtension(Extension):
-    def __init__(self, *args: Any, cache: Optional[Cache], **kwargs: Any):
+    def __init__(self, *args: Any, cache: Cache | None, **kwargs: Any):
         self.config = {
             "min_version": ["3.7", "minimum version"],
             "max_version": ["3.11", "maximum version"],
@@ -176,9 +179,8 @@ class AutoPyTabsExtension(Extension):
         self.cache = cache
         super().__init__(*args, **kwargs)
 
-    def extendMarkdown(self, md: markdown.Markdown) -> None:
+    def extendMarkdown(self, md: Markdown) -> None:
         """Register the extension."""
-
         self.md = md
         md.registerExtension(self)
         config = self.getConfigs()

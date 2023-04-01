@@ -1,9 +1,12 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mkdocs.config.defaults import MkDocsConfig
+
 
 from mkdocs.config import Config, config_options
-from mkdocs.config.defaults import MkDocsConfig
 from mkdocs.plugins import BasePlugin
 
 from auto_pytabs.core import Cache
@@ -18,7 +21,7 @@ class PluginConfig(Config):  # type: ignore[no-untyped-call]
 
 class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-call]
     def __init__(self) -> None:
-        self.cache: Optional[Cache] = None
+        self.cache: Cache | None = None
 
     def on_config(self, config: MkDocsConfig) -> Config | None:
         if not self.config.no_cache:

@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import importlib
 import importlib.metadata
-from typing import Any, Dict, Iterable, List, Optional, TYPE_CHECKING, cast
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, cast
 
 from docutils.nodes import Node, container, section
 from docutils.parsers.rst import directives
 from docutils.statemachine import ViewList
-from sphinx.config import Config
 from sphinx.directives.code import CodeBlock, LiteralInclude
-from sphinx.environment import BuildEnvironment
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.nodes import nested_parse_with_titles
 
@@ -22,9 +21,11 @@ from auto_pytabs.core import (
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
+    from sphinx.config import Config
+    from sphinx.environment import BuildEnvironment
 
 
-def indent(string: str, indent_char: str = " ", level: int = 4) -> List[str]:
+def indent(string: str, indent_char: str = " ", level: int = 4) -> list[str]:
     return list((indent_char * level) + line for line in string.splitlines())
 
 
@@ -33,7 +34,7 @@ class UpgradeMixin(SphinxDirective):
 
     def _render_directive_options(self) -> str:
         ret = ""
-        options: Dict[str, Any] = {
+        options: dict[str, Any] = {
             k: v for k, v in self.options.items() if k in CodeBlock.option_spec
         }
         if not self.compat:
@@ -50,7 +51,7 @@ class UpgradeMixin(SphinxDirective):
         self,
         versioned_code: VersionedCode,
         tab_title_template: str,
-    ) -> List[str]:
+    ) -> list[str]:
         if len(versioned_code) == 1:
             return [
                 ".. code-block:: python",
@@ -78,10 +79,10 @@ class UpgradeMixin(SphinxDirective):
         return out
 
     @property
-    def cache(self) -> Optional[Cache]:
+    def cache(self) -> Cache | None:
         return getattr(self.env, "auto_pytabs_cache", None)
 
-    def _create_py_tab_nodes(self, code: str) -> List[Node]:
+    def _create_py_tab_nodes(self, code: str) -> list[Node]:
         version_requirements = self.config["auto_pytabs_versions"]
         versioned_code = version_code(code, version_requirements, cache=self.cache)
         tabs = self._create_tabs(
@@ -99,7 +100,7 @@ class UpgradeMixin(SphinxDirective):
         nested_parse_with_titles(self.state, rst, node)
         nodes = node.children
 
-        return cast(List[Node], nodes)
+        return cast(list[Node], nodes)
 
 
 class PyTabsCodeBlock(CodeBlock, UpgradeMixin):
@@ -116,7 +117,7 @@ class PyTabsCodeBlock(CodeBlock, UpgradeMixin):
 class PyTabsLiteralInclude(LiteralInclude, UpgradeMixin):
     compat = True
 
-    def run(self) -> List[Node]:
+    def run(self) -> list[Node]:
         base_node = super().run()[0]
         if self.options.get("language") != "python":
             return [base_node]
@@ -129,7 +130,7 @@ class CodeBlockOverride(PyTabsCodeBlock):
     compat = False
     option_spec = {**CodeBlock.option_spec, "no-upgrade": directives.flag}
 
-    def run(self) -> List[Node]:
+    def run(self) -> list[Node]:
         if "no-upgrade" in self.options:
             return CodeBlock.run(self)
 
@@ -140,7 +141,7 @@ class LiteralIncludeOverride(PyTabsLiteralInclude):
     compat = False
     option_spec = {**LiteralInclude.option_spec, "no-upgrade": directives.flag}
 
-    def run(self) -> List[Node]:
+    def run(self) -> list[Node]:
         if "no-upgrade" in self.options:
             return LiteralInclude.run(self)
         return super().run()
@@ -162,23 +163,23 @@ def on_build_finished(app: Sphinx, exception: Exception | None) -> None:
 
 
 def on_env_before_read_docs(
-    app: Sphinx, env: BuildEnvironment, docnames: List[str]
+    app: Sphinx, env: BuildEnvironment, docnames: list[str]
 ) -> None:
     if not app.config["auto_pytabs_no_cache"]:
         env.auto_pytabs_cache = Cache()  # type: ignore[attr-defined]
 
 
 def on_env_merge_info(
-    app: Sphinx, env: BuildEnvironment, docnames: List[str], other: BuildEnvironment
+    app: Sphinx, env: BuildEnvironment, docnames: list[str], other: BuildEnvironment
 ) -> None:
-    cache: Optional[Cache] = getattr(env, "auto_pytabs_cache", None)
-    other_cache: Optional[Cache] = getattr(other, "auto_pytabs_cache", None)
+    cache: Cache | None = getattr(env, "auto_pytabs_cache", None)
+    other_cache: Cache | None = getattr(other, "auto_pytabs_cache", None)
     if cache and other_cache:
         cache._touched.update(other_cache._touched)
         cache._cache.update(other_cache._cache)
 
 
-def setup(app: Sphinx) -> Dict[str, bool | str]:
+def setup(app: Sphinx) -> dict[str, bool | str]:
     app.add_directive("pytabs-code-block", PyTabsCodeBlock)
     app.add_directive("pytabs-literalinclude", PyTabsLiteralInclude)
 
