@@ -35,6 +35,9 @@ jobs:
           - "3.10"
           - "3.11"
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -57,4 +60,6 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Run tests
-        run: poetry run pytest
+        run: |
+          source $VENV
+          pytest
