@@ -24,12 +24,13 @@ This, however, raises several problems:
 3. Dropping or adding support for Python versions requires revisiting every example in the documentation
 4. Checking potentially ~4 versions of a single example into VCS creates unnecessary noise
 
-Given those, it's no surprise that the current standard is to only show examples for the lowest  supported version of Python.
+Given those, it's no surprise that the current standard is to only show examples for the lowest supported version of Python.
 
 ### The solution
 
-**AutoPyTabs** aims to solve all of these problems by automatically generating versions of code examples, targeting different
-Python versions **at build-time**, based on a base version (the lowest supported Python version).
+**AutoPyTabs** aims to solve all of these problems by automatically generating versions (using the awsome
+[ruff](https://github.com/charliermarsh/ruff) project) of code examples, targeting different Python versions
+**at build-time**, based on a base version (the lowest supported Python version).
 This means that:
 
 1. There exists only one version of each example: The lowest supported version becomes the source of truth,
