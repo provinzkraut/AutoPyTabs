@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "auto-pytabs"
-version = "0.2.0"
+version = "0.3.0"
 description = "Automatically generate code examples for different Python versions in mkdocs or Sphinx based documentations"
 authors = ["Janek Nouvertné <provinzkraut@posteo.de>"]
 readme = "README.md"
