@@ -100,7 +100,7 @@ class UpgradeMixin(SphinxDirective):
         nested_parse_with_titles(self.state, rst, node)
         nodes = node.children
 
-        return cast(list[Node], nodes)
+        return cast("list[Node]", nodes)
 
 
 class PyTabsCodeBlock(CodeBlock, UpgradeMixin):

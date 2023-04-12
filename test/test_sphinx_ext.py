@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Callable
 from pathlib import Path
 from test.conftest import SphinxBuilder
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import pytest
 

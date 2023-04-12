@@ -5,7 +5,7 @@ import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from hashlib import sha1
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any, Dict, NamedTuple
 
 RUFF_BASE_ARGS = [
     "ruff",
@@ -32,7 +32,7 @@ class VersionTuple(NamedTuple):
         return VersionTuple(major=int(major), minor=int(minor))
 
 
-VersionedCode = dict[VersionTuple, str]
+VersionedCode = Dict[VersionTuple, str]
 
 
 class Cache:
