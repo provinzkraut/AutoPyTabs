@@ -1,11 +1,10 @@
-from typing import Optional, Tuple
+from __future__ import annotations
 
 import pytest
 import yaml
-from mkdocs.config.base import Config, load_config
-
 from auto_pytabs.core import Cache
 from auto_pytabs.mkdocs_plugin import AutoPyTabsPlugin
+from mkdocs.config.base import Config, load_config
 
 
 @pytest.fixture()
@@ -19,9 +18,9 @@ def setup_mkdocs(tmp_path, monkeypatch) -> None:
 @pytest.fixture()
 def create_mkdocs_config(request, tmp_path, setup_mkdocs):
     def _create_mkdocs_config(
-        min_version: Optional[str] = None,
-        max_version: Optional[str] = None,
-        tab_title_template: Optional[str] = None,
+        min_version: str | None = None,
+        max_version: str | None = None,
+        tab_title_template: str | None = None,
         no_cache: bool = False,
     ) -> Config:
         auto_pytabs_config = {}
@@ -51,7 +50,7 @@ def create_mkdocs_config(request, tmp_path, setup_mkdocs):
 
 
 @pytest.fixture()
-def configured_plugin(create_mkdocs_config) -> Tuple[AutoPyTabsPlugin, Config]:
+def configured_plugin(create_mkdocs_config) -> tuple[AutoPyTabsPlugin, Config]:
     config = create_mkdocs_config()
     plugin = config["plugins"]["auto_pytabs"]
     plugin.on_config(config)

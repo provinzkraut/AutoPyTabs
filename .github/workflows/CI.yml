@@ -23,15 +23,21 @@ jobs:
       - name: Execute Pre-Commit
         run: pre-commit run --show-diff-on-failure --color=always --all-files
   test:
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
+        os:
+          - "ubuntu-latest"
+          - "windows-latest"
         python-version:
           - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -54,4 +60,6 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Run tests
-        run: poetry run pytest
+        run: |
+          source $VENV
+          pytest

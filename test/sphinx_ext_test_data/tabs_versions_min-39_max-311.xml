@@ -14,7 +14,7 @@
                             <caption>
                                 test caption
                             <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
-                                from typing import Optional, Union
+                                from typing import Union, Optional
                                 
                                 def foo(x: Union[dict[str, str], list[str]]) -> Optional[list[int]]:
                                     pass
@@ -61,7 +61,7 @@
                             <caption>
                                 test caption
                             <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
-                                from typing import Optional, Union
+                                from typing import Union, Optional
                                 
                                 
                                 def foo(x: Union[dict[str, str], list[str]]) -> Optional[list[int]]:

@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Tuple
 
 import pytest
-
 from auto_pytabs.markdown_ext import UpgradePreprocessor
 
 TEST_DATA_DIR = Path("test/md_ext_test_data")
@@ -15,7 +13,7 @@ def preprocessor() -> UpgradePreprocessor:
     return UpgradePreprocessor(min_version="3.7", max_version="3.11")
 
 
-def get_test_data(name: str) -> Tuple[str, str]:
+def get_test_data(name: str) -> tuple[str, str]:
     in_file = TEST_DATA_DIR / f"{name}_in.md"
     out_file = TEST_DATA_DIR / f"{name}_out.md"
     return in_file.read_text(), out_file.read_text()
