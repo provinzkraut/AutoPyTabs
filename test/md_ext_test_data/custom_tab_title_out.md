@@ -6,7 +6,7 @@
         ...
     ```
 
-=== "Python 3.9 and above"
+===+ "Python 3.9 and above"
     ```python foo="bar"
     
     def bar(baz: set[str]) -> set[str]:

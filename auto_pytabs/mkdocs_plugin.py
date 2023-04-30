@@ -17,6 +17,7 @@ class PluginConfig(Config):  # type: ignore[no-untyped-call]
     max_version = config_options.Type(str, default="3.11")
     tab_title_template = config_options.Type(str, default="Python {min_version}+")
     no_cache = config_options.Type(bool, default=False)
+    default_tab = config_options.Choice(["highest", "lowest"], default="highest")
 
 
 class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-call]
@@ -35,6 +36,7 @@ class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-cal
                     "max_version": self.config.max_version,
                     "tab_title_template": self.config.tab_title_template,
                     "cache": self.cache,
+                    "default_tab": self.config.default_tab,
                 }
             }
         )

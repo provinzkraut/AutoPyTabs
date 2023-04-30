@@ -8,7 +8,7 @@
                     pass
             ```
         
-        === "Python 3.9+"
+        ===+ "Python 3.9+"
             ```python
             def func(x: list[str]) -> None:
                 def inner():

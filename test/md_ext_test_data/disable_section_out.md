@@ -14,7 +14,7 @@ y: Set[str]
     z: Dict[str, str]
     ```
 
-=== "Python 3.9+"
+===+ "Python 3.9+"
     ```python
     z: dict[str, str]
     ```

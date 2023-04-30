@@ -9,7 +9,7 @@ x: List[str]
     y: Set[str]
     ```
 
-=== "Python 3.9+"
+===+ "Python 3.9+"
     ```python
     y: set[str]
     ```

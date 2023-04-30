@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 import pytest
 import yaml
 from auto_pytabs.core import Cache
@@ -18,10 +20,12 @@ def setup_mkdocs(tmp_path, monkeypatch) -> None:
 @pytest.fixture()
 def create_mkdocs_config(request, tmp_path, setup_mkdocs):
     def _create_mkdocs_config(
+        *,
         min_version: str | None = None,
         max_version: str | None = None,
         tab_title_template: str | None = None,
         no_cache: bool = False,
+        default_tab: Literal["highest", "lowest"] | None = None,
     ) -> Config:
         auto_pytabs_config = {}
         if min_version:
@@ -32,6 +36,8 @@ def create_mkdocs_config(request, tmp_path, setup_mkdocs):
             auto_pytabs_config["tab_title_template"] = tab_title_template
         if no_cache:
             auto_pytabs_config["no_cache"] = no_cache
+        if default_tab:
+            auto_pytabs_config["default_tab"] = default_tab
 
         config = {
             "site_name": "Test docs",
@@ -57,19 +63,30 @@ def configured_plugin(create_mkdocs_config) -> tuple[AutoPyTabsPlugin, Config]:
     return plugin, config
 
 
+@pytest.mark.parametrize(
+    "default_tab,expected_default_tab_value",
+    [(None, "highest"), ("highest", "highest"), ("lowest", "lowest")],
+)
 @pytest.mark.parametrize("no_cache", [True, False])
 @pytest.mark.parametrize(
     "tab_title_template", ("{min_version}", "Python {min_version} and higher")
 )
 @pytest.mark.parametrize("min_version,max_version", [("3.7", "3.11"), ("3.8", "3.10")])
 def test_config(
-    min_version, max_version, no_cache, tab_title_template, create_mkdocs_config
+    min_version,
+    max_version,
+    no_cache,
+    tab_title_template,
+    create_mkdocs_config,
+    default_tab: str | None,
+    expected_default_tab_value: str,
 ) -> None:
     config = create_mkdocs_config(
         min_version=min_version,
         max_version=max_version,
         tab_title_template=tab_title_template,
         no_cache=no_cache,
+        default_tab=default_tab,
     )
     plugin = config["plugins"]["auto_pytabs"]
 
@@ -90,6 +107,10 @@ def test_config(
         assert isinstance(plugin.cache, Cache)
 
     assert config["mdx_configs"]["auto_pytabs"]["cache"] is plugin.cache
+    assert (
+        config["mdx_configs"]["auto_pytabs"]["default_tab"]
+        == expected_default_tab_value
+    )
 
 
 def test_on_post_build(configured_plugin, mock_cache_persist) -> None:
