@@ -78,17 +78,19 @@ plugins:
       tab_title_template: "Python {min_version}+"  # optional
       no_cache: false  # optional
       default_tab: "highest"  # optional
+      reverse_order: false  # optional
 ```
 
 *Available configuration options*
 
-| Name                 | Default                   | Description                                      |
-| -------------------- | ------------------------- | ------------------------------------------------ |
-| `min_version`        | `(3, 7)`                  | Minimum python version                           |
-| `max_version`        | `(3, 7)`                  | Maximum python version                           |
-| `tab_title_template` | `"Python {min_version}+"` | Template for tab titles                          |
-| `no_cache`           | `False`                   | Disable file system caching                      |
-| `default_tab`        | `highest`                 | (`highest` or `lowest`) Version tab to preselect |
+| Name                 | Default                   | Description                                                                |
+| -------------------- | ------------------------- | -------------------------------------------------------------------------- |
+| `min_version`        | `(3, 7)`                  | Minimum python version                                                     |
+| `max_version`        | `(3, 7)`                  | Maximum python version                                                     |
+| `tab_title_template` | `"Python {min_version}+"` | Template for tab titles                                                    |
+| `no_cache`           | `False`                   | Disable file system caching                                                |
+| `default_tab`        | `highest`                 | (`highest` or `lowest`) Version tab to preselect                           |
+| `reverse_order`      | `False`                   | Reverse the order of tabs. Default is to go from lowest to highest version |
 
 #### Markdown extension
 
@@ -102,6 +104,8 @@ md = markdown.Markdown(
             "min_version": "3.7",  # optional
             "max_version": "3.11",  # optional
             "tab_title_template": "Python {min_version}+",  # optional
+            "default_tab": "highest",  # optional
+            "reverse_order": False,  # optional
         }
     },
 )
@@ -109,12 +113,13 @@ md = markdown.Markdown(
 
 *Available configuration options*
 
-| Name                 | Default                   | Description                                      |
-| -------------------- | ------------------------- | ------------------------------------------------ |
-| `min_version`        | `(3, 7)`                  | Minimum python version to generate code for      |
-| `max_version`        | `(3, 7)`                  | Maximum python version to generate code for      |
-| `tab_title_template` | `"Python {min_version}+"` | Template for tab titles                          |
-| `default_tab`        | `highest`                 | (`highest` or `lowest`) Version tab to preselect |
+| Name                 | Default                   | Description                                                                |
+| -------------------- | ------------------------- | -------------------------------------------------------------------------- |
+| `min_version`        | `(3, 7)`                  | Minimum python version to generate code for                                |
+| `max_version`        | `(3, 7)`                  | Maximum python version to generate code for                                |
+| `tab_title_template` | `"Python {min_version}+"` | Template for tab titles                                                    |
+| `default_tab`        | `highest`                 | (`highest` or `lowest`) Version tab to preselect                           |
+| `reverse_order`      | `False`                   | Reverse the order of tabs. Default is to go from lowest to highest version |
 
 ### Differences between the mkdocs plugin and markdown extension
 

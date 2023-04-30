@@ -107,6 +107,7 @@ def _build_tabs(
     tail: str,
     tab_title_template: str,
     default_tab_version: VersionTuple,
+    reverse_order: bool,
 ) -> str:
     out = []
     for version, code in versioned_code.items():
@@ -118,6 +119,8 @@ def _build_tabs(
                 title=tab_title, body=lines, selected=version == default_tab_version
             )
         )
+    if reverse_order:
+        out = reversed(out)  # type: ignore[assignment]
     return "\n".join(out)
 
 
@@ -128,6 +131,7 @@ def _convert_block(
     tab_title_template: str,
     cache: Cache | None,
     default_tab_strategy: Literal["highest", "lowest"],
+    reverse_order: bool,
 ) -> str:
     block, indentation = _strip_indentation(block)
     head, *code_lines, tail = block
@@ -144,6 +148,7 @@ def _convert_block(
             tail=tail,
             tab_title_template=tab_title_template,
             default_tab_version=default_tab_version,
+            reverse_order=reverse_order,
         )
     else:
         code = "\n".join([head, versioned_code[versions[0]], tail])
@@ -161,7 +166,8 @@ class UpgradePreprocessor(Preprocessor):
         max_version: str,
         tab_title_template: str | None = None,
         cache: Cache | None = None,
-        default_tab_strategy: Literal["highest", "lowest"],
+        default_tab_strategy: Literal["highest", "lowest"] = "highest",
+        reverse_order: bool = False,
         **kwargs: Any,
     ) -> None:
         self.min_version = VersionTuple.from_string(min_version)
@@ -170,6 +176,7 @@ class UpgradePreprocessor(Preprocessor):
         self.tab_title_template = tab_title_template or "Python {min_version}+"
         self.cache = cache
         self.default_tab_strategy = default_tab_strategy
+        self.reverse_order = reverse_order
         super().__init__(*args, **kwargs)
 
     def run(self, lines: list[str]) -> list[str]:
@@ -185,6 +192,7 @@ class UpgradePreprocessor(Preprocessor):
                     tab_title_template=self.tab_title_template,
                     cache=self.cache,
                     default_tab_strategy=self.default_tab_strategy,
+                    reverse_order=self.reverse_order,
                 ).splitlines()
                 output_lines.extend(transformed_block)
             else:
@@ -200,6 +208,7 @@ class AutoPyTabsExtension(Extension):
             "max_version": ["3.11", "maximum version"],
             "tab_title_template": ["", "tab title format-string"],
             "default_tab": ["highest", "version tab to preselect"],
+            "reverse_order": [False, "reverse the order of tabs"],
         }
         self.cache = cache
         super().__init__(*args, **kwargs)
@@ -217,6 +226,7 @@ class AutoPyTabsExtension(Extension):
                 tab_title_template=config["tab_title_template"],
                 cache=self.cache,
                 default_tab_strategy=config["default_tab"],
+                reverse_order=config["reverse_order"],
             ),
             "auto_pytabs",
             32,
