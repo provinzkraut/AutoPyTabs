@@ -28,7 +28,7 @@ Given those, it's no surprise that the current standard is to only show examples
 
 ### The solution
 
-**AutoPyTabs** aims to solve all of these problems by automatically generating versions (using the awsome
+**AutoPyTabs** aims to solve all of these problems by automatically generating versions (using the awesome
 [ruff](https://github.com/charliermarsh/ruff) project) of code examples, targeting different Python versions
 **at build-time**, based on a base version (the lowest supported Python version).
 This means that:
