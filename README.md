@@ -289,18 +289,20 @@ auto_pytabs_tab_title_template = "Python {min_version}+"  # optional
 # auto_pytabs_no_cache = True  # disabled file system caching
 # auto_pytabs_compat_mode = True  # enable compatibility mode
 # auto_pytabs_default_tab = "lowest"  # Pre-select the tab with the lowest version
+# auto_pytabs_reverse_order = True  # reverse the order of tabs to highest > lowest
 ```
 
 #### Available configuration options
 
-| Name                             | Default                   | Description                                            |
-| -------------------------------- | ------------------------- | ------------------------------------------------------ |
-| `auto_pytabs_min_version`        | `(3, 7)`                  | Minimum python version to generate code for            |
-| `auto_pytabs_max_version`        | `(3, 7)`                  | Maximum python version to generate code for            |
-| `auto_pytabs_tab_title_template` | `"Python {min_version}+"` | Template for tab titles                                |
-| `auto_pytabs_no_cache`           | `False`                   | Disable file system caching                            |
-| `auto_pytabs_compat_mode`        | `False`                   | Enable [compatibility mode](#compatibility-mode)       |
-| `auto_pytabs_default_tab`        | `highest`                 | Either `highest` or `lowest`. Version tab to preselect |
+| Name                             | Default                   | Description                                                                |
+| -------------------------------- | ------------------------- | -------------------------------------------------------------------------- |
+| `auto_pytabs_min_version`        | `(3, 7)`                  | Minimum python version to generate code for                                |
+| `auto_pytabs_max_version`        | `(3, 7)`                  | Maximum python version to generate code for                                |
+| `auto_pytabs_tab_title_template` | `"Python {min_version}+"` | Template for tab titles                                                    |
+| `auto_pytabs_no_cache`           | `False`                   | Disable file system caching                                                |
+| `auto_pytabs_compat_mode`        | `False`                   | Enable [compatibility mode](#compatibility-mode)                           |
+| `auto_pytabs_default_tab`        | `highest`                 | Either `highest` or `lowest`. Version tab to preselect                     |
+| `auto_pytabs_reverse_order`      | `False`                   | Reverse the order of tabs. Default is to go from lowest to highest version |
 
 <h3 id="sphinx-examples">Examples</h3>
 

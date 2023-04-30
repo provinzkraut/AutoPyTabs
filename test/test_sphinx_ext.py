@@ -52,6 +52,28 @@ def test_upgrade_tabs_all_versions(
         mock_cache_persist.assert_called_once_with()
 
 
+def test_upgrade_reverse_order(
+    sphinx_builder: SphinxBuilderFixture,
+    file_regression: FileRegressionFixture,
+    compat: bool,
+    source: str,
+):
+    builder = sphinx_builder(
+        source=source,
+        auto_pytabs_no_cache=True,
+        auto_pytabs_reverse_order=True,
+        compat=compat,
+    )
+
+    builder.build()
+
+    file_regression.force_regen = True
+    pformat = builder.get_doctree("index").pformat()
+    file_regression.check(
+        pformat, fullpath=TEST_DATA_DIR / "tabs_all_versions_reversed.xml"
+    )
+
+
 def test_upgrade_single_version(
     sphinx_builder: SphinxBuilderFixture,
     file_regression: FileRegressionFixture,
@@ -106,13 +128,15 @@ def test_upgrade_versions(
     )
 
 
+@pytest.mark.parametrize("reverse_order", [True, False])
 @pytest.mark.parametrize("default_tab_version", ["highest", "lowest"])
-def test_upgrade_default_tab_version(
+def test_upgrade_default_tab(
     default_tab_version: str,
     sphinx_builder: SphinxBuilderFixture,
     file_regression: FileRegressionFixture,
     source: str,
     compat: bool,
+    reverse_order: bool,
 ) -> None:
     builder = sphinx_builder(
         source=source,
@@ -120,12 +144,14 @@ def test_upgrade_default_tab_version(
         auto_pytabs_default_tab=default_tab_version,
         auto_pytabs_min_version=(3, 7),
         auto_pytabs_max_version=(3, 10),
+        auto_pytabs_reverse_order=reverse_order,
     )
     builder.build()
 
     pformat = builder.get_doctree("index").pformat()
 
-    file_regression.check(
-        pformat,
-        fullpath=TEST_DATA_DIR.joinpath(f"tabs_default_tab_{default_tab_version}.xml"),
-    )
+    file_stem = f"tabs_default_tab_{default_tab_version}"
+    if reverse_order:
+        file_stem += "_reversed"
+
+    file_regression.check(pformat, fullpath=TEST_DATA_DIR.joinpath(file_stem + ".xml"))
