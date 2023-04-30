@@ -117,7 +117,7 @@ def test_upgrade_default_tab_version(
     builder = sphinx_builder(
         source=source,
         compat=compat,
-        auto_by_tabs_default_tab=default_tab_version,
+        auto_pytabs_default_tab=default_tab_version,
         auto_pytabs_min_version=(3, 7),
         auto_pytabs_max_version=(3, 10),
     )
