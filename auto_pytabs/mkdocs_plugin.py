@@ -18,6 +18,7 @@ class PluginConfig(Config):  # type: ignore[no-untyped-call]
     tab_title_template = config_options.Type(str, default="Python {min_version}+")
     no_cache = config_options.Type(bool, default=False)
     default_tab = config_options.Choice(["highest", "lowest"], default="highest")
+    reverse_order = config_options.Type(bool, default=False)
 
 
 class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-call]
@@ -37,6 +38,7 @@ class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-cal
                     "tab_title_template": self.config.tab_title_template,
                     "cache": self.cache,
                     "default_tab": self.config.default_tab,
+                    "reverse_order": self.config.reverse_order,
                 }
             }
         )

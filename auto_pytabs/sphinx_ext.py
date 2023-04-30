@@ -25,7 +25,9 @@ if TYPE_CHECKING:
     from sphinx.environment import BuildEnvironment
 
 
-def indent(text: str | list[str], indent_char: str = " ", level: int = 4) -> list[str]:
+def indent(
+    text: str | Iterable[str], indent_char: str = " ", level: int = 4
+) -> list[str]:
     lines = text.splitlines() if isinstance(text, str) else text
     return list((indent_char * level) + line for line in lines)
 
@@ -35,7 +37,7 @@ def _render_directive(
     name: str,
     argument: str = "",
     options: dict[str, Any] | None = None,
-    body: str | list[str],
+    body: str | Iterable[str],
 ) -> list[str]:
     directive = [f".. {name}:: {argument}"]
     if options:
@@ -92,6 +94,9 @@ class UpgradeMixin(SphinxDirective):
         ]
 
         tab_set_body = []
+        if self.config["auto_pytabs_reverse_order"]:
+            versioned_code = dict(reversed(versioned_code.items()))
+
         for version, code in versioned_code.items():
             version_string = f"{version[0]}.{version[1]}"
             code_block = _render_directive(
@@ -228,6 +233,7 @@ def setup(app: Sphinx) -> dict[str, bool | str]:
     app.add_config_value("auto_pytabs_no_cache", default=False, rebuild="html")
     app.add_config_value("auto_pytabs_compat_mode", default=False, rebuild="html")
     app.add_config_value("auto_pytabs_default_tab", default="highest", rebuild="html")
+    app.add_config_value("auto_pytabs_reverse_order", default=False, rebuild="html")
 
     app.connect("config-inited", on_config_inited)
     app.connect("build-finished", on_build_finished)

@@ -26,6 +26,7 @@ def create_mkdocs_config(request, tmp_path, setup_mkdocs):
         tab_title_template: str | None = None,
         no_cache: bool = False,
         default_tab: Literal["highest", "lowest"] | None = None,
+        reverse_order: bool | None = None,
     ) -> Config:
         auto_pytabs_config = {}
         if min_version:
@@ -38,6 +39,8 @@ def create_mkdocs_config(request, tmp_path, setup_mkdocs):
             auto_pytabs_config["no_cache"] = no_cache
         if default_tab:
             auto_pytabs_config["default_tab"] = default_tab
+        if reverse_order is not None:
+            auto_pytabs_config["reverse_order"] = reverse_order
 
         config = {
             "site_name": "Test docs",
@@ -64,6 +67,10 @@ def configured_plugin(create_mkdocs_config) -> tuple[AutoPyTabsPlugin, Config]:
 
 
 @pytest.mark.parametrize(
+    "reverse_order,expected_reverse_order_value",
+    [(None, False), (True, True), (False, False)],
+)
+@pytest.mark.parametrize(
     "default_tab,expected_default_tab_value",
     [(None, "highest"), ("highest", "highest"), ("lowest", "lowest")],
 )
@@ -80,6 +87,8 @@ def test_config(
     create_mkdocs_config,
     default_tab: str | None,
     expected_default_tab_value: str,
+    reverse_order: bool | None,
+    expected_reverse_order_value: bool,
 ) -> None:
     config = create_mkdocs_config(
         min_version=min_version,
@@ -87,6 +96,7 @@ def test_config(
         tab_title_template=tab_title_template,
         no_cache=no_cache,
         default_tab=default_tab,
+        reverse_order=reverse_order,
     )
     plugin = config["plugins"]["auto_pytabs"]
 
@@ -95,22 +105,20 @@ def test_config(
 
     plugin.on_config(config)
 
+    received_config = config["mdx_configs"]["auto_pytabs"]
+
     assert "auto_pytabs" in config["markdown_extensions"]
-    assert config["mdx_configs"]["auto_pytabs"]["min_version"] == min_version
-    assert config["mdx_configs"]["auto_pytabs"]["max_version"] == max_version
-    assert (
-        config["mdx_configs"]["auto_pytabs"]["tab_title_template"] == tab_title_template
-    )
+    assert received_config["min_version"] == min_version
+    assert received_config["max_version"] == max_version
+    assert received_config["tab_title_template"] == tab_title_template
+    assert received_config["cache"] is plugin.cache
+    assert received_config["default_tab"] == expected_default_tab_value
+    assert received_config["reverse_order"] == expected_reverse_order_value
+
     if no_cache:
         assert plugin.cache is None
     else:
         assert isinstance(plugin.cache, Cache)
-
-    assert config["mdx_configs"]["auto_pytabs"]["cache"] is plugin.cache
-    assert (
-        config["mdx_configs"]["auto_pytabs"]["default_tab"]
-        == expected_default_tab_value
-    )
 
 
 def test_on_post_build(configured_plugin, mock_cache_persist) -> None:
