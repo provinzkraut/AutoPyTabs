@@ -83,11 +83,13 @@ class UpgradeMixin(SphinxDirective):
                 options=directive_options,
             )
 
-        default_tab: Literal["highest", "lowest"] = self.config[
+        default_tab_strategy: Literal["highest", "lowest"] = self.config[
             "auto_pytabs_default_tab"
         ]
         versions = list(versioned_code.keys())
-        default_selected_version = versions[-1 if default_tab == "highest" else 0]
+        default_selected_version = versions[
+            -1 if default_tab_strategy == "highest" else 0
+        ]
 
         tab_set_body = []
         for version, code in versioned_code.items():
