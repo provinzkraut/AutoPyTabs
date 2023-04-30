@@ -1,4 +1,4 @@
-=== "Python 3.7+"
+===+ "Python 3.7+"
     ```python foo="bar"
     from typing import Set, Optional
     

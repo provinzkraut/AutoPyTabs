@@ -10,7 +10,9 @@ TEST_DATA_DIR = Path("test/md_ext_test_data")
 
 @pytest.fixture()
 def preprocessor() -> UpgradePreprocessor:
-    return UpgradePreprocessor(min_version="3.7", max_version="3.11")
+    return UpgradePreprocessor(
+        min_version="3.7", max_version="3.11", default_tab_strategy="highest"
+    )
 
 
 def get_test_data(name: str) -> tuple[str, str]:
@@ -21,14 +23,23 @@ def get_test_data(name: str) -> tuple[str, str]:
 
 def test_upgrade_single_version(file_regression):
     source, expected_output = get_test_data("upgrade_single")
-    preprocessor = UpgradePreprocessor(min_version="3.9", max_version="3.11")
+    preprocessor = UpgradePreprocessor(
+        min_version="3.9", max_version="3.11", default_tab_strategy="highest"
+    )
 
     output = "\n".join(preprocessor.run(source.splitlines()))
     assert output == expected_output
 
 
-def test_upgrade(preprocessor: UpgradePreprocessor):
-    source, expected_output = get_test_data("upgrade")
+@pytest.mark.parametrize("default_tab_strategy", ["highest", "lowest"])
+def test_upgrade(default_tab_strategy: str):
+    source = TEST_DATA_DIR.joinpath("upgrade_in.md").read_text()
+    expected_output = TEST_DATA_DIR.joinpath(
+        f"upgrade_out_default_{default_tab_strategy}.md"
+    ).read_text()
+    preprocessor = UpgradePreprocessor(
+        min_version="3.7", max_version="3.11", default_tab_strategy=default_tab_strategy
+    )
 
     output = "\n".join(preprocessor.run(source.splitlines()))
     assert output == expected_output
@@ -39,6 +50,7 @@ def test_upgrade_custom_tab_title():
         min_version="3.7",
         max_version="3.11",
         tab_title_template="Python {min_version} and above",
+        default_tab_strategy="highest",
     )
     source, expected_output = get_test_data("custom_tab_title")
 

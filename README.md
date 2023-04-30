@@ -77,16 +77,18 @@ plugins:
       max_version: "3.11" # optional
       tab_title_template: "Python {min_version}+"  # optional
       no_cache: false  # optional
+      default_tab: "highest"  # optional
 ```
 
 *Available configuration options*
 
-| Name                 | Default                   | Description                 |
-| -------------------- | ------------------------- | --------------------------- |
-| `min_version`        | `(3, 7)`                  | Minimum python version      |
-| `max_version`        | `(3, 7)`                  | Maximum python version      |
-| `tab_title_template` | `"Python {min_version}+"` | Template for tab titles     |
-| `no_cache`           | `False`                   | Disable file system caching |
+| Name                 | Default                   | Description                                      |
+| -------------------- | ------------------------- | ------------------------------------------------ |
+| `min_version`        | `(3, 7)`                  | Minimum python version                           |
+| `max_version`        | `(3, 7)`                  | Maximum python version                           |
+| `tab_title_template` | `"Python {min_version}+"` | Template for tab titles                          |
+| `no_cache`           | `False`                   | Disable file system caching                      |
+| `default_tab`        | `highest`                 | (`highest` or `lowest`) Version tab to preselect |
 
 #### Markdown extension
 
@@ -107,11 +109,12 @@ md = markdown.Markdown(
 
 *Available configuration options*
 
-| Name                 | Default                   | Description                                 |
-| -------------------- | ------------------------- | ------------------------------------------- |
-| `min_version`        | `(3, 7)`                  | Minimum python version to generate code for |
-| `max_version`        | `(3, 7)`                  | Maximum python version to generate code for |
-| `tab_title_template` | `"Python {min_version}+"` | Template for tab titles                     |
+| Name                 | Default                   | Description                                      |
+| -------------------- | ------------------------- | ------------------------------------------------ |
+| `min_version`        | `(3, 7)`                  | Minimum python version to generate code for      |
+| `max_version`        | `(3, 7)`                  | Maximum python version to generate code for      |
+| `tab_title_template` | `"Python {min_version}+"` | Template for tab titles                          |
+| `default_tab`        | `highest`                 | (`highest` or `lowest`) Version tab to preselect |
 
 ### Differences between the mkdocs plugin and markdown extension
 
@@ -285,17 +288,19 @@ auto_pytabs_max_version = (3, 11)  # optional
 auto_pytabs_tab_title_template = "Python {min_version}+"  # optional 
 # auto_pytabs_no_cache = True  # disabled file system caching
 # auto_pytabs_compat_mode = True  # enable compatibility mode
+# auto_pytabs_default_tab = "lowest"  # Pre-select the tab with the lowest version
 ```
 
 #### Available configuration options
 
-| Name                             | Default                   | Description                                      |
-| -------------------------------- | ------------------------- | ------------------------------------------------ |
-| `auto_pytabs_min_version`        | `(3, 7)`                  | Minimum python version to generate code for      |
-| `auto_pytabs_max_version`        | `(3, 7)`                  | Maximum python version to generate code for      |
-| `auto_pytabs_tab_title_template` | `"Python {min_version}+"` | Template for tab titles                          |
-| `auto_pytabs_no_cache`           | `False`                   | Disable file system caching                      |
-| `auto_pytabs_compat_mode`        | `False`                   | Enable [compatibility mode](#compatibility-mode) |
+| Name                             | Default                   | Description                                            |
+| -------------------------------- | ------------------------- | ------------------------------------------------------ |
+| `auto_pytabs_min_version`        | `(3, 7)`                  | Minimum python version to generate code for            |
+| `auto_pytabs_max_version`        | `(3, 7)`                  | Maximum python version to generate code for            |
+| `auto_pytabs_tab_title_template` | `"Python {min_version}+"` | Template for tab titles                                |
+| `auto_pytabs_no_cache`           | `False`                   | Disable file system caching                            |
+| `auto_pytabs_compat_mode`        | `False`                   | Enable [compatibility mode](#compatibility-mode)       |
+| `auto_pytabs_default_tab`        | `highest`                 | Either `highest` or `lowest`. Version tab to preselect |
 
 <h3 id="sphinx-examples">Examples</h3>
 

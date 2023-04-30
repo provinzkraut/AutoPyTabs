@@ -38,8 +38,9 @@ def _strip_indentation(lines: list[str]) -> tuple[list[str], str]:
     return lines, indent
 
 
-def _add_indentation(code: str, indentation: str) -> str:
-    return "\n".join(indentation + line for line in code.splitlines())
+def _add_indentation(source: str | list[str], indentation: str) -> str:
+    lines = source.splitlines() if isinstance(source, str) else source
+    return "\n".join(indentation + line for line in lines)
 
 
 def _get_pytabs_directive(line: str) -> PyTabDirective | None:
@@ -92,16 +93,31 @@ def _extract_code_blocks(lines: list[str]) -> tuple[list[str], dict[int, list[st
     return new_lines, to_transform
 
 
+def _build_tab(title: str, body: list[str], selected: bool) -> str:
+    out = f'==={"+" if selected else ""} "{title}"\n'
+    out += _add_indentation(body, indentation="    ")
+    out += "\n"
+    return out
+
+
 def _build_tabs(
-    *, versioned_code: VersionedCode, head: str, tail: str, tab_title_template: str
+    *,
+    versioned_code: VersionedCode,
+    head: str,
+    tail: str,
+    tab_title_template: str,
+    default_tab_version: VersionTuple,
 ) -> str:
     out = []
     for version, code in versioned_code.items():
         version_string = f"{version[0]}.{version[1]}"
         lines = [head, *code.splitlines(), tail]
-        code = "\n".join("    " + line for line in lines)
         tab_title = tab_title_template.format(min_version=version_string)
-        out.append(f'=== "{tab_title}"\n{code}\n')
+        out.append(
+            _build_tab(
+                title=tab_title, body=lines, selected=version == default_tab_version
+            )
+        )
     return "\n".join(out)
 
 
@@ -111,6 +127,7 @@ def _convert_block(
     versions: list[VersionTuple],
     tab_title_template: str,
     cache: Cache | None,
+    default_tab_strategy: Literal["highest", "lowest"],
 ) -> str:
     block, indentation = _strip_indentation(block)
     head, *code_lines, tail = block
@@ -118,11 +135,15 @@ def _convert_block(
     versioned_code = version_code(code, versions, cache=cache)
 
     if len(versioned_code) > 1:
+        versions = list(versioned_code.keys())
+        default_tab_version = versions[-1 if default_tab_strategy == "highest" else 0]
+
         code = _build_tabs(
             versioned_code=versioned_code,
             head=head,
             tail=tail,
             tab_title_template=tab_title_template,
+            default_tab_version=default_tab_version,
         )
     else:
         code = "\n".join([head, versioned_code[versions[0]], tail])
@@ -140,6 +161,7 @@ class UpgradePreprocessor(Preprocessor):
         max_version: str,
         tab_title_template: str | None = None,
         cache: Cache | None = None,
+        default_tab_strategy: Literal["highest", "lowest"],
         **kwargs: Any,
     ) -> None:
         self.min_version = VersionTuple.from_string(min_version)
@@ -147,6 +169,7 @@ class UpgradePreprocessor(Preprocessor):
         self.versions = get_version_requirements(self.min_version, self.max_version)
         self.tab_title_template = tab_title_template or "Python {min_version}+"
         self.cache = cache
+        self.default_tab_strategy = default_tab_strategy
         super().__init__(*args, **kwargs)
 
     def run(self, lines: list[str]) -> list[str]:
@@ -161,6 +184,7 @@ class UpgradePreprocessor(Preprocessor):
                     versions=self.versions,
                     tab_title_template=self.tab_title_template,
                     cache=self.cache,
+                    default_tab_strategy=self.default_tab_strategy,
                 ).splitlines()
                 output_lines.extend(transformed_block)
             else:
@@ -175,6 +199,7 @@ class AutoPyTabsExtension(Extension):
             "min_version": ["3.7", "minimum version"],
             "max_version": ["3.11", "maximum version"],
             "tab_title_template": ["", "tab title format-string"],
+            "default_tab": ["highest", "version tab to preselect"],
         }
         self.cache = cache
         super().__init__(*args, **kwargs)
@@ -191,6 +216,7 @@ class AutoPyTabsExtension(Extension):
                 max_version=config["max_version"],
                 tab_title_template=config["tab_title_template"],
                 cache=self.cache,
+                default_tab_strategy=config["default_tab"],
             ),
             "auto_pytabs",
             32,

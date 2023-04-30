@@ -16,7 +16,7 @@ SOURCE_CONTENT = (TEST_DATA_DIR / "test.rst").read_text()
 SOURCE_CONTENT_COMPAT = (TEST_DATA_DIR / "test_compat.rst").read_text()
 
 
-@pytest.fixture(params=[True, False])
+@pytest.fixture(params=[True, False], ids=lambda item: f"compat:{item}")
 def compat(request) -> bool:
     return request.param
 
@@ -28,7 +28,7 @@ def source(compat: bool) -> str:
     return SOURCE_CONTENT
 
 
-@pytest.mark.parametrize("no_cache", [True, False])
+@pytest.mark.parametrize("no_cache", [True, False], ids=lambda item: f"nocache:{item}")
 def test_upgrade_tabs_all_versions(
     sphinx_builder: SphinxBuilderFixture,
     file_regression: FileRegressionFixture,
@@ -70,7 +70,12 @@ def test_upgrade_single_version(
 
 @pytest.mark.parametrize(
     "min_version,max_version",
-    [((3, i), (3, j)) for i in range(8, 12) for j in range(7, 12) if i <= j],
+    [
+        pytest.param((3, i), (3, j), id=f"min:3.{i}-max:3.{j}")
+        for i in range(8, 12)
+        for j in range(7, 12)
+        if i <= j
+    ],
 )
 def test_upgrade_versions(
     min_version: tuple[int, int],
@@ -98,4 +103,29 @@ def test_upgrade_versions(
         fullpath=TEST_DATA_DIR.joinpath(
             f"tabs_versions_min-{min_version[0]}{min_version[1]}_max-{max_version[0]}{max_version[1]}.xml"
         ),
+    )
+
+
+@pytest.mark.parametrize("default_tab_version", ["highest", "lowest"])
+def test_upgrade_default_tab_version(
+    default_tab_version: str,
+    sphinx_builder: SphinxBuilderFixture,
+    file_regression: FileRegressionFixture,
+    source: str,
+    compat: bool,
+) -> None:
+    builder = sphinx_builder(
+        source=source,
+        compat=compat,
+        auto_pytabs_default_tab=default_tab_version,
+        auto_pytabs_min_version=(3, 7),
+        auto_pytabs_max_version=(3, 10),
+    )
+    builder.build()
+
+    pformat = builder.get_doctree("index").pformat()
+
+    file_regression.check(
+        pformat,
+        fullpath=TEST_DATA_DIR.joinpath(f"tabs_default_tab_{default_tab_version}.xml"),
     )

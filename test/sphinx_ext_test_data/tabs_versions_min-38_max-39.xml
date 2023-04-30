@@ -18,7 +18,7 @@
                                 
                                 def foo(x: Union[Dict[str, str], List[str]]) -> Optional[List[int]]:
                                     pass
-                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
+                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="True">
                     <rubric classes="sd-tab-label" sync_id="3.9">
                         Python 3.9+
                     <container classes="sd-tab-content" design_component="tab-content" is_div="True">
@@ -68,7 +68,7 @@
                                 
                                 def foo(x: Union[Dict[str, str], List[str]]) -> Optional[List[int]]:
                                     pass
-                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
+                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="True">
                     <rubric classes="sd-tab-label" sync_id="3.9">
                         Python 3.9+
                     <container classes="sd-tab-content" design_component="tab-content" is_div="True">

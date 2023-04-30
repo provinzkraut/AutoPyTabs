@@ -6,7 +6,7 @@
             <title>
                 code-block
             <container classes="sd-tab-set" design_component="tab-set" is_div="True">
-                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
+                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="True">
                     <rubric classes="sd-tab-label" sync_id="3.7">
                         Python 3.7+
                     <container classes="sd-tab-content" design_component="tab-content" is_div="True">
@@ -30,7 +30,7 @@
                                 
                                 def foo(x: Union[dict[str, str], list[str]]) -> Optional[list[int]]:
                                     pass
-                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="True">
+                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
                     <rubric classes="sd-tab-label" sync_id="3.10">
                         Python 3.10+
                     <container classes="sd-tab-content" design_component="tab-content" is_div="True">
@@ -65,7 +65,7 @@
             <title>
                 literalinclude
             <container classes="sd-tab-set" design_component="tab-set" is_div="True">
-                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
+                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="True">
                     <rubric classes="sd-tab-label" sync_id="3.7">
                         Python 3.7+
                     <container classes="sd-tab-content" design_component="tab-content" is_div="True">
@@ -91,7 +91,7 @@
                                 
                                 def foo(x: Union[dict[str, str], list[str]]) -> Optional[list[int]]:
                                     pass
-                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="True">
+                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
                     <rubric classes="sd-tab-label" sync_id="3.10">
                         Python 3.10+
                     <container classes="sd-tab-content" design_component="tab-content" is_div="True">

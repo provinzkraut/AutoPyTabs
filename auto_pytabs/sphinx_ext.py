@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib
 import importlib.metadata
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from docutils.nodes import Node, container, section
 from docutils.parsers.rst import directives
@@ -25,58 +25,93 @@ if TYPE_CHECKING:
     from sphinx.environment import BuildEnvironment
 
 
-def indent(string: str, indent_char: str = " ", level: int = 4) -> list[str]:
-    return list((indent_char * level) + line for line in string.splitlines())
+def indent(text: str | list[str], indent_char: str = " ", level: int = 4) -> list[str]:
+    lines = text.splitlines() if isinstance(text, str) else text
+    return list((indent_char * level) + line for line in lines)
+
+
+def _render_directive(
+    *,
+    name: str,
+    argument: str = "",
+    options: dict[str, Any] | None = None,
+    body: str | list[str],
+) -> list[str]:
+    directive = [f".. {name}:: {argument}"]
+    if options:
+        rendered_options = [
+            f":{option}: {value if (value is not True and value) else ''}"
+            for option, value in options.items()
+            if value is not False
+        ]
+        directive.extend(indent(rendered_options))
+
+    directive.append("")
+    directive.extend(indent(body))
+
+    return directive
 
 
 class UpgradeMixin(SphinxDirective):
     compat: bool = False
 
-    def _render_directive_options(self) -> str:
-        ret = ""
-        options: dict[str, Any] = {
-            k: v for k, v in self.options.items() if k in CodeBlock.option_spec
-        }
+    def _get_directive_options(self) -> dict[str, Any]:
+        options: dict[str, Any] = {}
         if not self.compat:
             options["no-upgrade"] = True
-        for option, value in options.items():
+        for option, value in self.options.items():
+            if option not in CodeBlock.option_spec:
+                continue
             if self.option_spec[option] is directives.flag:
-                value = None
+                value = True
             if isinstance(value, Iterable) and not isinstance(value, str):
                 value = "\n".join(value)
-            ret += f":{option}: {value if value is not None else ''}\n"
-        return ret
+            options[option] = value
+        return options
 
     def _create_tabs(
         self,
         versioned_code: VersionedCode,
         tab_title_template: str,
     ) -> list[str]:
+        directive_options = self._get_directive_options()
         if len(versioned_code) == 1:
-            return [
-                ".. code-block:: python",
-                *indent(self._render_directive_options()),
-                "",
-                *indent(versioned_code.popitem()[1]),
-                "",
-            ]
+            return _render_directive(
+                name="code-block",
+                argument="python",
+                body=versioned_code.popitem()[1],
+                options=directive_options,
+            )
 
-        out = [".. tab-set::", ""]
+        default_tab_strategy: Literal["highest", "lowest"] = self.config[
+            "auto_pytabs_default_tab"
+        ]
+        versions = list(versioned_code.keys())
+        default_selected_version = versions[
+            -1 if default_tab_strategy == "highest" else 0
+        ]
+
+        tab_set_body = []
         for version, code in versioned_code.items():
             version_string = f"{version[0]}.{version[1]}"
-            out.extend(
-                [
-                    f"    .. tab-item:: {tab_title_template.format(min_version=version_string)}",  # noqa: E501
-                    f"        :sync: {version_string}",
-                    "",
-                    "        .. code-block:: python",
-                    *indent(self._render_directive_options(), level=12),
-                    "",
-                    *indent(code, level=12),
-                    "",
-                ]
+            code_block = _render_directive(
+                name="code-block",
+                argument="python",
+                options=directive_options,
+                body=code,
             )
-        return out
+            tab_item = _render_directive(
+                name="tab-item",
+                argument=tab_title_template.format(min_version=version_string),
+                options={
+                    "sync": version_string,
+                    "selected": version == default_selected_version,
+                },
+                body=code_block,
+            )
+            tab_set_body.extend(tab_item)
+
+        return _render_directive(name="tab-set", body=tab_set_body)
 
     @property
     def cache(self) -> Cache | None:
@@ -192,6 +227,7 @@ def setup(app: Sphinx) -> dict[str, bool | str]:
     app.add_config_value("auto_pytabs_max_version", default=(3, 11), rebuild="html")
     app.add_config_value("auto_pytabs_no_cache", default=False, rebuild="html")
     app.add_config_value("auto_pytabs_compat_mode", default=False, rebuild="html")
+    app.add_config_value("auto_pytabs_default_tab", default="highest", rebuild="html")
 
     app.connect("config-inited", on_config_inited)
     app.connect("build-finished", on_build_finished)
