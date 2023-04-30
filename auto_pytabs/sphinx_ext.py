@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib
 import importlib.metadata
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from docutils.nodes import Node, container, section
 from docutils.parsers.rst import directives
@@ -34,13 +34,15 @@ def _render_directive(
     *,
     name: str,
     argument: str = "",
-    options: dict[str, str | None] | None = None,
+    options: dict[str, Any] | None = None,
     body: str | list[str],
 ) -> list[str]:
     directive = [f".. {name}:: {argument}"]
     if options:
         rendered_options = [
-            f":{option}: {value or ''}" for option, value in options.items()
+            f":{option}: {value if (value is not True and value) else ''}"
+            for option, value in options.items()
+            if value is not False
         ]
         directive.extend(indent(rendered_options))
 
@@ -56,12 +58,12 @@ class UpgradeMixin(SphinxDirective):
     def _get_directive_options(self) -> dict[str, Any]:
         options: dict[str, Any] = {}
         if not self.compat:
-            options["no-upgrade"] = None
+            options["no-upgrade"] = True
         for option, value in self.options.items():
             if option not in CodeBlock.option_spec:
                 continue
             if self.option_spec[option] is directives.flag:
-                value = None
+                value = True
             if isinstance(value, Iterable) and not isinstance(value, str):
                 value = "\n".join(value)
             options[option] = value
@@ -81,6 +83,12 @@ class UpgradeMixin(SphinxDirective):
                 options=directive_options,
             )
 
+        default_tab: Literal["highest", "lowest"] = self.config[
+            "auto_pytabs_default_tab"
+        ]
+        versions = list(versioned_code.keys())
+        default_selected_version = versions[-1 if default_tab == "highest" else 0]
+
         tab_set_body = []
         for version, code in versioned_code.items():
             version_string = f"{version[0]}.{version[1]}"
@@ -93,7 +101,10 @@ class UpgradeMixin(SphinxDirective):
             tab_item = _render_directive(
                 name="tab-item",
                 argument=tab_title_template.format(min_version=version_string),
-                options={"sync": version_string},
+                options={
+                    "sync": version_string,
+                    "selected": version == default_selected_version,
+                },
                 body=code_block,
             )
             tab_set_body.extend(tab_item)
@@ -173,16 +184,6 @@ def on_config_inited(app: Sphinx, config: Config) -> None:
     config["auto_pytabs_versions"] = get_version_requirements(
         config["auto_pytabs_min_version"], config["auto_pytabs_max_version"]
     )
-    default_tab = config["auto_by_tabs_default_tab"]
-    default_selected_tab = None
-    if default_tab == "highest":
-        default_selected_tab = config["auto_pytabs_max_version"]
-    elif default_tab == "lowest":
-        default_selected_tab = config["auto_pytabs_min_version"]
-    else:
-        default_selected_tab = default_tab
-
-    config["_auto_pytabs_default_selected_tab"] = default_selected_tab
 
     if not config["auto_pytabs_compat_mode"]:
         app.add_directive("code-block", CodeBlockOverride, override=True)
@@ -224,7 +225,7 @@ def setup(app: Sphinx) -> dict[str, bool | str]:
     app.add_config_value("auto_pytabs_max_version", default=(3, 11), rebuild="html")
     app.add_config_value("auto_pytabs_no_cache", default=False, rebuild="html")
     app.add_config_value("auto_pytabs_compat_mode", default=False, rebuild="html")
-    app.add_config_value("auto_by_tabs_default_tab", default="highest", rebuild="html")
+    app.add_config_value("auto_pytabs_default_tab", default="highest", rebuild="html")
 
     app.connect("config-inited", on_config_inited)
     app.connect("build-finished", on_build_finished)
