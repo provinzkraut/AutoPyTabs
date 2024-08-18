@@ -9,6 +9,7 @@ from typing import Any, Dict, NamedTuple
 
 RUFF_BASE_ARGS = [
     "ruff",
+    "check",
     "--no-cache",
     "--fix",
     "--quiet",
