@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from test.conftest import SphinxBuilder
 from typing import TYPE_CHECKING, Callable
 
 import pytest
+
+from test.conftest import SphinxBuilder
 
 if TYPE_CHECKING:
     from pytest_regressions.file_regression import FileRegressionFixture

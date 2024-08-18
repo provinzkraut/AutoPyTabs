@@ -69,7 +69,7 @@ class SphinxBuilder:
             self.app.env.apply_post_transforms(doctree, docname)
         # make source path consistent for test comparisons
         for node in doctree.findall(include_self=True):
-            if not ("source" in node and node["source"]):
+            if not ("source" in node and node["source"]):  # noqa: RUF019
                 continue
             node["source"] = Path(node["source"]).relative_to(self.src_path).as_posix()
             if node["source"].endswith(".rst"):
