@@ -14,7 +14,6 @@ markdown = {version = ">=3.2.1", optional = true }
 mkdocs = {version = ">=1.4.2,<2", optional = true}
 
 [tool.poetry.group.dev.dependencies]
-black = "^22.10.0"
 mypy = "^1.11.1"
 types-markdown = "^3.6.0.20240316"
 pytest = "^8.3.2"
