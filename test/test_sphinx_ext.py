@@ -81,7 +81,7 @@ def test_upgrade_single_version(
     source: str,
 ):
     builder = sphinx_builder(
-        source=source, compat=compat, auto_pytabs_min_version=(3, 11)
+        source=source, compat=compat, auto_pytabs_min_version=(3, 12)
     )
 
     builder.build()
@@ -94,8 +94,8 @@ def test_upgrade_single_version(
     "min_version,max_version",
     [
         pytest.param((3, i), (3, j), id=f"min:3.{i}-max:3.{j}")
-        for i in range(8, 12)
-        for j in range(7, 12)
+        for i in range(8, 13)
+        for j in range(7, 13)
         if i <= j
     ],
 )

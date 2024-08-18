@@ -7,34 +7,10 @@
                 code-block
             <container classes="sd-tab-set" design_component="tab-set" is_div="True">
                 <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
-                    <rubric classes="sd-tab-label" sync_id="3.7">
-                        Python 3.7+
+                    <rubric classes="sd-tab-label" sync_id="3.11">
+                        Python 3.11+
                     <container classes="sd-tab-content" design_component="tab-content" is_div="True">
                         <container classes="literal-block-wrapper" ids="id1" literal_block="True">
-                            <caption>
-                                test caption
-                            <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
-                                from typing import Dict, Union, List, Optional
-                                
-                                def foo(x: Union[Dict[str, str], List[str]]) -> Optional[List[int]]:
-                                    pass
-                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
-                    <rubric classes="sd-tab-label" sync_id="3.9">
-                        Python 3.9+
-                    <container classes="sd-tab-content" design_component="tab-content" is_div="True">
-                        <container classes="literal-block-wrapper" ids="id2" literal_block="True">
-                            <caption>
-                                test caption
-                            <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
-                                from typing import Union, Optional
-                                
-                                def foo(x: Union[dict[str, str], list[str]]) -> Optional[list[int]]:
-                                    pass
-                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
-                    <rubric classes="sd-tab-label" sync_id="3.10">
-                        Python 3.10+
-                    <container classes="sd-tab-content" design_component="tab-content" is_div="True">
-                        <container classes="literal-block-wrapper" ids="id3" literal_block="True">
                             <caption>
                                 test caption
                             <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
@@ -44,14 +20,14 @@
                     <rubric classes="sd-tab-label" sync_id="3.12">
                         Python 3.12+
                     <container classes="sd-tab-content" design_component="tab-content" is_div="True">
-                        <container classes="literal-block-wrapper" ids="id4" literal_block="True">
+                        <container classes="literal-block-wrapper" ids="id2" literal_block="True">
                             <caption>
                                 test caption
                             <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
         <section ids="code-block-no-upgrade" names="code-block\ no\ upgrade">
             <title>
                 code-block no upgrade
-            <container classes="literal-block-wrapper" ids="id5" literal_block="True">
+            <container classes="literal-block-wrapper" ids="id3" literal_block="True">
                 <caption>
                     test caption
                 <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
@@ -74,36 +50,10 @@
                 literalinclude
             <container classes="sd-tab-set" design_component="tab-set" is_div="True">
                 <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
-                    <rubric classes="sd-tab-label" sync_id="3.7">
-                        Python 3.7+
+                    <rubric classes="sd-tab-label" sync_id="3.11">
+                        Python 3.11+
                     <container classes="sd-tab-content" design_component="tab-content" is_div="True">
-                        <container classes="literal-block-wrapper" ids="id6" literal_block="True">
-                            <caption>
-                                test caption
-                            <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
-                                from typing import Dict, Union, List, Optional
-                                
-                                
-                                def foo(x: Union[Dict[str, str], List[str]]) -> Optional[List[int]]:
-                                    pass
-                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
-                    <rubric classes="sd-tab-label" sync_id="3.9">
-                        Python 3.9+
-                    <container classes="sd-tab-content" design_component="tab-content" is_div="True">
-                        <container classes="literal-block-wrapper" ids="id7" literal_block="True">
-                            <caption>
-                                test caption
-                            <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
-                                from typing import Union, Optional
-                                
-                                
-                                def foo(x: Union[dict[str, str], list[str]]) -> Optional[list[int]]:
-                                    pass
-                <container classes="sd-tab-item" design_component="tab-item" is_div="True" selected="False">
-                    <rubric classes="sd-tab-label" sync_id="3.10">
-                        Python 3.10+
-                    <container classes="sd-tab-content" design_component="tab-content" is_div="True">
-                        <container classes="literal-block-wrapper" ids="id8" literal_block="True">
+                        <container classes="literal-block-wrapper" ids="id4" literal_block="True">
                             <caption>
                                 test caption
                             <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
@@ -113,7 +63,7 @@
                     <rubric classes="sd-tab-label" sync_id="3.12">
                         Python 3.12+
                     <container classes="sd-tab-content" design_component="tab-content" is_div="True">
-                        <container classes="literal-block-wrapper" ids="id9" literal_block="True">
+                        <container classes="literal-block-wrapper" ids="id5" literal_block="True">
                             <caption>
                                 test caption
                             <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">

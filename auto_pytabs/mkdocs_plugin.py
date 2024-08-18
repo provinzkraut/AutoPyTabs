@@ -14,7 +14,7 @@ from auto_pytabs.core import Cache
 
 class PluginConfig(Config):  # type: ignore[no-untyped-call]
     min_version = config_options.Type(str, default="3.7")
-    max_version = config_options.Type(str, default="3.11")
+    max_version = config_options.Type(str, default="3.12")
     tab_title_template = config_options.Type(str, default="Python {min_version}+")
     no_cache = config_options.Type(bool, default=False)
     default_tab = config_options.Choice(["highest", "lowest"], default="highest")

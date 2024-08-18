@@ -74,7 +74,7 @@ markdown_extensions:
 plugins:
   - auto_pytabs:
       min_version: "3.7"  # optional
-      max_version: "3.11" # optional
+      max_version: "3.12" # optional
       tab_title_template: "Python {min_version}+"  # optional
       no_cache: false  # optional
       default_tab: "highest"  # optional
@@ -86,7 +86,7 @@ plugins:
 | Name                 | Default                   | Description                                                                |
 | -------------------- | ------------------------- | -------------------------------------------------------------------------- |
 | `min_version`        | `(3, 7)`                  | Minimum python version                                                     |
-| `max_version`        | `(3, 7)`                  | Maximum python version                                                     |
+| `max_version`        | `(3, 12)`                 | Maximum python version                                                     |
 | `tab_title_template` | `"Python {min_version}+"` | Template for tab titles                                                    |
 | `no_cache`           | `False`                   | Disable file system caching                                                |
 | `default_tab`        | `highest`                 | (`highest` or `lowest`) Version tab to preselect                           |
@@ -102,7 +102,7 @@ md = markdown.Markdown(
     extension_configs={
         "auto_pytabs": {
             "min_version": "3.7",  # optional
-            "max_version": "3.11",  # optional
+            "max_version": "3.12",  # optional
             "tab_title_template": "Python {min_version}+",  # optional
             "default_tab": "highest",  # optional
             "reverse_order": False,  # optional
