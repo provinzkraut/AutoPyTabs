@@ -17,6 +17,7 @@ RUFF_BASE_ARGS = [
     "UP",
     "--select",
     "F401",
+    "--unsafe-fixes",
     "--isolated",
     "-",
     "--target-version",
