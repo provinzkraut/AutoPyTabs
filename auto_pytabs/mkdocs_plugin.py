@@ -25,7 +25,7 @@ class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-cal
     def __init__(self) -> None:
         self.cache: Cache | None = None
 
-    def on_config(self, config: MkDocsConfig) -> Config | None:
+    def on_config(self, config: MkDocsConfig) -> MkDocsConfig | None:
         if not self.config.no_cache:
             self.cache = Cache()
 
@@ -42,7 +42,7 @@ class AutoPyTabsPlugin(BasePlugin[PluginConfig]):  # type: ignore[no-untyped-cal
                 }
             }
         )
-        return None
+        return config
 
     def on_post_build(self, config: MkDocsConfig) -> None:
         if self.cache:

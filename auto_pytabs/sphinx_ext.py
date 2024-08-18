@@ -3,11 +3,11 @@ from __future__ import annotations
 import importlib
 import importlib.metadata
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal
 
 from docutils.nodes import Node, container, section
 from docutils.parsers.rst import directives
-from docutils.statemachine import ViewList
+from docutils.statemachine import StringList
 from sphinx.directives.code import CodeBlock, LiteralInclude
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.nodes import nested_parse_with_titles
@@ -64,7 +64,7 @@ class UpgradeMixin(SphinxDirective):
         for option, value in self.options.items():
             if option not in CodeBlock.option_spec:
                 continue
-            if self.option_spec[option] is directives.flag:
+            if self.option_spec and self.option_spec[option] is directives.flag:
                 value = True
             if isinstance(value, Iterable) and not isinstance(value, str):
                 value = "\n".join(value)
@@ -129,7 +129,7 @@ class UpgradeMixin(SphinxDirective):
             versioned_code, self.env.config["auto_pytabs_tab_title_template"]
         )
 
-        rst = ViewList()
+        rst = StringList()
         source, lineno = self.get_source_info()
         for line in tabs:
             rst.append(line, source, lineno)
@@ -138,9 +138,7 @@ class UpgradeMixin(SphinxDirective):
         node.document = self.state.document
 
         nested_parse_with_titles(self.state, rst, node)
-        nodes = node.children
-
-        return cast("list[Node]", nodes)
+        return node.children
 
 
 class PyTabsCodeBlock(CodeBlock, UpgradeMixin):
@@ -163,12 +161,12 @@ class PyTabsLiteralInclude(LiteralInclude, UpgradeMixin):
             return [base_node]
         if isinstance(base_node, container):
             base_node = base_node.children[1]
-        return self._create_py_tab_nodes(base_node.rawsource)  # type: ignore[attr-defined]  # noqa: E501
+        return self._create_py_tab_nodes(base_node.rawsource)  # type: ignore[attr-defined]
 
 
 class CodeBlockOverride(PyTabsCodeBlock):
     compat = False
-    option_spec = {**CodeBlock.option_spec, "no-upgrade": directives.flag}
+    option_spec = {**CodeBlock.option_spec, "no-upgrade": directives.flag}  # type: ignore[misc]  # noqa: RUF012
 
     def run(self) -> list[Node]:
         if "no-upgrade" in self.options:
@@ -179,7 +177,10 @@ class CodeBlockOverride(PyTabsCodeBlock):
 
 class LiteralIncludeOverride(PyTabsLiteralInclude):
     compat = False
-    option_spec = {**LiteralInclude.option_spec, "no-upgrade": directives.flag}
+    option_spec = {  # type: ignore[misc]  # noqa: RUF012
+        **LiteralInclude.option_spec,
+        "no-upgrade": directives.flag,
+    }
 
     def run(self) -> list[Node]:
         if "no-upgrade" in self.options:

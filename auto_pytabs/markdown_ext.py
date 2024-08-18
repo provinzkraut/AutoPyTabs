@@ -153,9 +153,7 @@ def _convert_block(
     else:
         code = "\n".join([head, versioned_code[versions[0]], tail])
 
-    code = _add_indentation(code, indentation)
-
-    return code
+    return _add_indentation(code, indentation)
 
 
 class UpgradePreprocessor(Preprocessor):
