@@ -9,6 +9,8 @@
                 <caption>
                     test caption
                 <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
+                    def foo(x: dict[str, str] | list[str]) -> list[int] | None:
+                        pass
         <section ids="code-block-no-upgrade" names="code-block\ no\ upgrade">
             <title>
                 code-block no upgrade
@@ -37,6 +39,8 @@
                 <caption>
                     test caption
                 <literal_block force="False" highlight_args="{}" language="python" xml:space="preserve">
+                    def foo(x: dict[str, str] | list[str]) -> list[int] | None:
+                        pass
         <section ids="literalinclude-non-python" names="literalinclude\ non-python">
             <title>
                 literalinclude non-python
