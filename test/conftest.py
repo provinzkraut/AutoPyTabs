@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 from auto_pytabs.core import Cache
-from sphinx.testing.path import path as sphinx_path
 
 if TYPE_CHECKING:
     from unittest.mock import MagicMock
@@ -102,7 +101,7 @@ def sphinx_builder(tmp_path: Path, make_app, monkeypatch):
             [f"{key} = {value!r}" for key, value in conf_kwargs.items()]
         )
         src_path.joinpath("conf.py").write_text(content, encoding="utf8")
-        app = make_app(srcdir=sphinx_path(str(src_path.resolve())), buildername="html")
+        app = make_app(srcdir=src_path.resolve(), buildername="html")
         shutil.copy(
             "test/sphinx_ext_test_data/example.py", src_path.joinpath("example.py")
         )
