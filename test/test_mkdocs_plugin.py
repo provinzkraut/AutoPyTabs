@@ -78,7 +78,7 @@ def configured_plugin(create_mkdocs_config) -> tuple[AutoPyTabsPlugin, Config]:
 @pytest.mark.parametrize(
     "tab_title_template", ("{min_version}", "Python {min_version} and higher")
 )
-@pytest.mark.parametrize("min_version,max_version", [("3.7", "3.11"), ("3.8", "3.10")])
+@pytest.mark.parametrize("min_version,max_version", [("3.9", "3.13"), ("3.10", "3.11")])
 def test_config(
     min_version,
     max_version,

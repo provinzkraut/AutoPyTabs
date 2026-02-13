@@ -202,8 +202,8 @@ class UpgradePreprocessor(Preprocessor):
 class AutoPyTabsExtension(Extension):
     def __init__(self, *args: Any, cache: Cache | None, **kwargs: Any):
         self.config = {
-            "min_version": ["3.7", "minimum version"],
-            "max_version": ["3.12", "maximum version"],
+            "min_version": ["3.9", "minimum version"],
+            "max_version": ["3.13", "maximum version"],
             "tab_title_template": ["", "tab title format-string"],
             "default_tab": ["highest", "version tab to preselect"],
             "reverse_order": [False, "reverse the order of tabs"],

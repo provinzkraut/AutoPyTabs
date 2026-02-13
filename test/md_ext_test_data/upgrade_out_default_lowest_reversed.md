@@ -5,18 +5,10 @@
         ...
     ```
 
-=== "Python 3.9+"
+===+ "Python 3.9+"
     ```python foo="bar"
     from typing import Optional
     
     def bar(baz: Optional[str]) -> set[str]:
-        ...
-    ```
-
-===+ "Python 3.7+"
-    ```python foo="bar"
-    from typing import Set, Optional
-    
-    def bar(baz: Optional[str]) -> Set[str]:
         ...
     ```

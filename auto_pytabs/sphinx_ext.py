@@ -229,8 +229,8 @@ def setup(app: Sphinx) -> dict[str, bool | str]:
         default="Python {min_version}+",
         rebuild="html",
     )
-    app.add_config_value("auto_pytabs_min_version", default=(3, 7), rebuild="html")
-    app.add_config_value("auto_pytabs_max_version", default=(3, 12), rebuild="html")
+    app.add_config_value("auto_pytabs_min_version", default=(3, 9), rebuild="html")
+    app.add_config_value("auto_pytabs_max_version", default=(3, 13), rebuild="html")
     app.add_config_value("auto_pytabs_no_cache", default=False, rebuild="html")
     app.add_config_value("auto_pytabs_compat_mode", default=False, rebuild="html")
     app.add_config_value("auto_pytabs_default_tab", default="highest", rebuild="html")

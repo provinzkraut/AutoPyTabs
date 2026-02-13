@@ -15,7 +15,7 @@ TEST_DATA_DIR = Path("test/md_ext_test_data")
 @pytest.fixture()
 def preprocessor() -> UpgradePreprocessor:
     return UpgradePreprocessor(
-        min_version="3.7", max_version="3.11", default_tab_strategy="highest"
+        min_version="3.9", max_version="3.13", default_tab_strategy="highest"
     )
 
 
@@ -51,7 +51,7 @@ def test_upgrade(
     expected_output = TEST_DATA_DIR.joinpath(file_stem + ".md")
 
     preprocessor = UpgradePreprocessor(
-        min_version="3.7",
+        min_version="3.9",
         max_version="3.11",
         default_tab_strategy=default_tab_strategy,
         reverse_order=reverse_order,
@@ -63,8 +63,8 @@ def test_upgrade(
 
 def test_upgrade_custom_tab_title(file_regression: FileRegressionFixture):
     preprocessor = UpgradePreprocessor(
-        min_version="3.7",
-        max_version="3.11",
+        min_version="3.9",
+        max_version="3.13",
         tab_title_template="Python {min_version} and above",
         default_tab_strategy="highest",
     )
